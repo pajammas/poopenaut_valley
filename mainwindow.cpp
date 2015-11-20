@@ -1,13 +1,11 @@
-using namespace std;
-#include <string>
-#include <iostream>
-
-#include <QFileDialog>
-#include <Eigen>
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QFileDialog>
+#include <QPainter>
+#include <string>
+#include <iostream>
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -37,6 +35,9 @@ void MainWindow::on_selectImageButton_clicked()
     QPixmap image(fileName);
     QPixmap ScaledIm = image.scaled(ui->imageLabel->width(),ui->imageLabel->height(),Qt::KeepAspectRatio);
     ui->imageLabel->setPixmap(ScaledIm);
+    QPainter painter;
+    painter.begin(&ScaledIm);
+    painter.end();
 
     // Resize the window to fit the image
     //ui->centralWidget->adjustSize();
