@@ -27,8 +27,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_resetButton_clicked()
 {
-    ui->imageLabel->clear();
-    ui->imageLabel->setText("No image selected...");
+    //ui->imageLabel->clear();
+    //ui->imageLabel->setText("No image selected...");
     fileName.clear();
 }
 
@@ -61,22 +61,34 @@ void MainWindow::on_bgRadioButton_clicked()
 void MainWindow::on_segmentButton_clicked()
 {
     if (!fileName.isNull()) {
-        QImage edit_image = QImage(fileName);
-        QColor pix = QColor( edit_image.pixel(0,0) );
-        cout << pix;
+        QColor pix = QColor( image.pixel(0,0) );
+        //cout << pix;
+        neighbors(0, image.height());
+        neighbors(image.width(), 0);
+        neighbors(image.width(), image.height());
+        cout << "kay\n";
+        neighbors(0, image.height()-1);
+        neighbors(image.width()-1, 0);
+        neighbors(image.width()-1, image.height()-1);
     }
+}
+
+bool inBounds(int h, int w, int x, int y) {
+    return ((x<w) && (y<h) && (x>=0) && (y>=0));
 }
 
 QVector<QPoint> MainWindow::neighbors(int x, int y)
 {
-    image = QImage(fileName);
-    height = image.height();
-    width = image.width();
+    int h = image.height();
+    int w = image.width();
 
     QVector<QPoint> n;
+    if (inBounds(h, w, x, y+1))  n += QPoint(x, y+1);
+    if (inBounds(h, w, x, y-1))  n += QPoint(x, y-1);
+    if (inBounds(h, w, x+1, y))  n += QPoint(x+1, y);
+    if (inBounds(h, w, x-1, y))  n += QPoint(x-1, y);
 
-}
-
-bool outOfBounds(int x, int y, int h, int w) {
-    return ((x<w) && (y<h) && (x>=0) && (y>=0));
+    int i;
+    for (i=0; i<n.length(); i++) cout << n[i].x() << ' ' << n[i].y() <<'\n';
+    return n;
 }

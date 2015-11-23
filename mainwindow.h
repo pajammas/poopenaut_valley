@@ -28,13 +28,12 @@ class MainWindow : public QMainWindow
     private:
         Ui::MainWindow *ui;
         QString fileName;
+        QImage image;
+        QRgb currentSeedColor;
+        QVector<QPoint> neighbors(int, int);
+
 
     void on_bgRadioButton_clicked();
-
-private:
-    Ui::MainWindow *ui;
-    QImage image;
-    QRgb currentSeedColor;
 
 };
 
