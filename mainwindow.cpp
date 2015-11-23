@@ -16,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     // QString initializes to NULL
     fileName = QString();
+    currentSeedColor = qRgb(12,175,243);
+    ui->widget->setCurrentSeedColor(currentSeedColor);
 }
 
 MainWindow::~MainWindow()
@@ -35,24 +37,25 @@ void MainWindow::on_selectImageButton_clicked()
 {
     // Open a dialog to select a file
     fileName = QFileDialog::getOpenFileName(this,
-                        tr("Select Image"), "/home/duncan/Downloads", tr("Image Files (*.png *.jpg *.jpeg *.bmp)"));
-    // Display the image in the window
-    QPixmap image(fileName);
-    QPixmap ScaledIm = image.scaled(ui->imageLabel->width(),ui->imageLabel->height(),Qt::KeepAspectRatio);
-    ui->imageLabel->setPixmap(ScaledIm);
-    QPainter painter;
-    painter.begin(&ScaledIm);
-    painter.end();
+                                tr("Select Image"),
+                                "/home/duncan/Downloads",
+                                tr("Image Files (*.png *.jpg *.jpeg *.bmp)"));
 
-    // Resize the window to fit the image
-    //ui->centralWidget->adjustSize();
-    //this->adjustSize();
-
+    image.load(fileName);
+    image = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
+    ui->widget->setImage(image);
 }
 
 void MainWindow::on_fgRadioButton_clicked()
 {
+    currentSeedColor = qRgb(12,175,243);
+    ui->widget->setCurrentSeedColor(currentSeedColor);
+}
 
+void MainWindow::on_bgRadioButton_clicked()
+{
+    currentSeedColor = qRgb(236,0,16);
+    ui->widget->setCurrentSeedColor(currentSeedColor);
 }
 
 void MainWindow::on_segmentButton_clicked()

@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <string>
+#include <QList>
 
 namespace Ui {
 class MainWindow;
@@ -28,6 +28,13 @@ class MainWindow : public QMainWindow
     private:
         Ui::MainWindow *ui;
         QString fileName;
+
+    void on_bgRadioButton_clicked();
+
+private:
+    Ui::MainWindow *ui;
+    QImage image;
+    QRgb currentSeedColor;
 
 };
 
