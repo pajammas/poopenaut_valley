@@ -1,13 +1,15 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+using namespace std;
+#include <iostream>
+#include <cmath>
 
 #include <QFileDialog>
 #include <QPainter>
-//#include <string>
-#include <iostream>
-using namespace std;
 
 #include <Eigen>
+
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     // QString initializes to NULL
     fileName = QString();
+    beta = 1.0;
     currentSeedColor = qRgb(12,175,243);
     ui->widget->setCurrentSeedColor(currentSeedColor);
 }
@@ -73,22 +76,67 @@ void MainWindow::on_segmentButton_clicked()
     }
 }
 
-bool inBounds(int h, int w, int x, int y) {
-    return ((x<w) && (y<h) && (x>=0) && (y>=0));
+bool MainWindow::inBounds(int x, int y) {
+    return ((x<image.width()) && (y<image.height()) && (x>=0) && (y>=0));
 }
 
 QVector<QPoint> MainWindow::neighbors(int x, int y)
 {
-    int h = image.height();
-    int w = image.width();
-
     QVector<QPoint> n;
-    if (inBounds(h, w, x, y+1))  n += QPoint(x, y+1);
-    if (inBounds(h, w, x, y-1))  n += QPoint(x, y-1);
-    if (inBounds(h, w, x+1, y))  n += QPoint(x+1, y);
-    if (inBounds(h, w, x-1, y))  n += QPoint(x-1, y);
+    // Add all neighbor pixels which are in bounds
+    if (inBounds(x, y+1))  n += QPoint(x, y+1);
+    if (inBounds(x, y-1))  n += QPoint(x, y-1);
+    if (inBounds(x+1, y))  n += QPoint(x+1, y);
+    if (inBounds(x-1, y))  n += QPoint(x-1, y);
 
-    int i;
-    for (i=0; i<n.length(); i++) cout << n[i].x() << ' ' << n[i].y() <<'\n';
+    // For testing
+    //int i;
+    //for (i=0; i<n.length(); i++) cout << n[i].x() << ' ' << n[i].y() <<'\n';
     return n;
+}
+
+// Return the max of the three squared differences.
+int norm(QColor i, QColor j)
+{
+    int r = pow(i.red() - j.red(), 2);
+    int g = pow(i.green() - j.green(), 2);
+    int b = pow(i.blue() - j.blue(), 2);
+    return max(r, max(g, b));
+}
+
+// This function will set sigma, as well as negBetaSigma for later use.
+void MainWindow::setSigma() {
+    // Sigma is the maximum norm of the image.
+    sigma = 0;
+    // Iterators
+    int r, c, n;
+    QColor pix, neigh;
+    // For each pixel in the image:
+    for (r=0; r<image.height(); r++) {
+        for (c=0; c<image.width(); c++) {
+            // Get the pixel color and its neighbors' coordinates
+            pix = image.pixel(r,c);
+            QVector<QPoint> neighs = neighbors(r, c);
+            // For each neighbor:
+            for (n=0; n<neighs.length(); n++) {
+                // Get the neighbor's color
+                neigh = image.pixel(neighs[n]);
+                // If the norm is greater, set it as the new max.
+                sigma = max(sigma, norm(pix, neigh));
+            }
+        }
+    }
+    // Make sure we never divide by zero.
+    if (sigma != 0)
+        negBetaSigma = (-1 * beta) / sigma;
+    else
+        // If sigma = 0, the image is all the same color.
+        // Weights don't matter as long as they're all equal.
+        negBetaSigma = 0;
+}
+
+// Simple equation from the paper.
+float MainWindow::weight(QColor i, QColor j)
+{
+    return exp(negBetaSigma * norm(i,j)) + 0.000001;
 }
