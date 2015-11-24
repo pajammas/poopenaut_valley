@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QList>
 
 namespace Ui {
 class MainWindow;
@@ -22,8 +23,13 @@ private slots:
 
     void on_fgRadioButton_clicked();
 
+    void on_bgRadioButton_clicked();
+
 private:
     Ui::MainWindow *ui;
+    QImage image;
+    QRgb currentSeedColor;
+
 };
 
 #endif // MAINWINDOW_H
