@@ -4,8 +4,12 @@
 #include <QMainWindow>
 #include <QList>
 
+#include <Eigen/Core>
+using Eigen::MatrixXf;
+
+
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -42,6 +46,7 @@ class MainWindow : public QMainWindow
         bool inBounds(int, int);
         void setSigma();
         float weight(QColor, QColor);
+        MatrixXf getLMatrix();
 
 
 

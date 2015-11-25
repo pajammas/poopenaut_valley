@@ -1,14 +1,12 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+
 using namespace std;
 #include <iostream>
 #include <cmath>
 
 #include <QFileDialog>
 #include <QPainter>
-
-#include <Eigen>
-
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -64,15 +62,11 @@ void MainWindow::on_bgRadioButton_clicked()
 void MainWindow::on_segmentButton_clicked()
 {
     if (!fileName.isNull()) {
-        QColor pix = QColor( image.pixel(0,0) );
-        //cout << pix;
-        neighbors(0, image.height());
-        neighbors(image.width(), 0);
-        neighbors(image.width(), image.height());
-        cout << "kay\n";
-        neighbors(0, image.height()-1);
-        neighbors(image.width()-1, 0);
-        neighbors(image.width()-1, image.height()-1);
+        setSigma();
+        qDebug()<< image.width() << image.height() <<endl;
+
+        MatrixXf L = getLMatrix();
+        qDebug() << L(0,0) << endl;
     }
 }
 
@@ -92,6 +86,15 @@ QVector<QPoint> MainWindow::neighbors(int x, int y)
     // For testing
     //int i;
     //for (i=0; i<n.length(); i++) cout << n[i].x() << ' ' << n[i].y() <<'\n';
+    /*
+    neighbors(0, image.height());
+    neighbors(image.width(), 0);
+    neighbors(image.width(), image.height());
+    cout << "kay\n";
+    neighbors(0, image.height()-1);
+    neighbors(image.width()-1, 0);
+    neighbors(image.width()-1, image.height()-1);
+    */
     return n;
 }
 
@@ -108,15 +111,17 @@ int norm(QColor i, QColor j)
 void MainWindow::setSigma() {
     // Sigma is the maximum norm of the image.
     sigma = 0;
+
     // Iterators
     int r, c, n;
     QColor pix, neigh;
     // For each pixel in the image:
-    for (r=0; r<image.height(); r++) {
-        for (c=0; c<image.width(); c++) {
+    for (c=0; c<image.width(); c++) {
+        for (r=0; r<image.height(); r++) {
+
             // Get the pixel color and its neighbors' coordinates
-            pix = image.pixel(r,c);
-            QVector<QPoint> neighs = neighbors(r, c);
+            pix = image.pixel(c,r);
+            QVector<QPoint> neighs = neighbors(c, r);
             // For each neighbor:
             for (n=0; n<neighs.length(); n++) {
                 // Get the neighbor's color
@@ -133,10 +138,50 @@ void MainWindow::setSigma() {
         // If sigma = 0, the image is all the same color.
         // Weights don't matter as long as they're all equal.
         negBetaSigma = 0;
+    cout << negBetaSigma;
 }
 
 // Simple equation from the paper.
 float MainWindow::weight(QColor i, QColor j)
 {
     return exp(negBetaSigma * norm(i,j)) + 0.000001;
+}
+
+// L = D - W
+MatrixXf MainWindow::getLMatrix()
+{
+    qDebug() << "wow!";
+    int h = image.height();
+    int w = image.width();
+    // Dynamic initialization of square matrix, length = rows*cols
+    MatrixXf L = MatrixXf::Zero(h*w, h*w);
+    qDebug()<< "sheeesh\n" <<endl;
+
+    // Iterators
+    int r, c, n;
+    QColor pix, neigh;
+    // For each pixel in the image:
+    for (c=0; c<w; c++) {
+        for (r=0; r<h; r++) {
+
+            // Get the pixel color and its neighbors' coordinates
+            pix = image.pixel(c,r);
+            QVector<QPoint> neighs = neighbors(c, r);
+
+            qDebug() << c << " " << r << endl;
+            // For each neighbor:
+            cout << c << "=c, r=" << r << '\n';
+            for (n=0; n<neighs.length(); n++) {
+                // Get the neighbor's color
+                neigh = image.pixel(neighs[n]);
+
+                // This is an element of the W matrix. Negative.
+                L(r*w+c, neighs[n].y()*w + neighs[n].x()) -= weight(pix, neigh);
+                // Element of D matrix. Accumulate all the weights of pix.
+                L(r*w+c, r*w+c) += weight(pix, neigh);
+                // To avoid more calls to weight(), we could use the W entry.
+            }
+        }
+    }
+    return L;
 }

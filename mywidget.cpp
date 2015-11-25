@@ -29,8 +29,8 @@ void mywidget::mouseMoveEvent(QMouseEvent * e) {
 
     int x = e->x();
     int y = e->y();
-    qDebug()<< e->type()<<endl;
-    qDebug() << x << " " << y << endl;
+    //qDebug()<< e->type()<<endl;
+    //qDebug() << x << " " << y << endl;
 
     if ((e->buttons()==Qt::LeftButton)&&(currentSeed == qRgb(12,175,243)))
         {
