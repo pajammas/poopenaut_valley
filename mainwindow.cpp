@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-using namespace std;
 #include <iostream>
 #include <cmath>
 
@@ -43,8 +42,9 @@ void MainWindow::on_selectImageButton_clicked()
                                 tr("Image Files (*.png *.jpg *.jpeg *.bmp)"));
 
     image.load(fileName);
-    image = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
-    ui->widget->setImage(image);
+    // Make a resized copy, don't resize the image itself.
+    QImage display_img = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
+    ui->widget->setImage(display_img);
 }
 
 void MainWindow::on_fgRadioButton_clicked()
@@ -62,11 +62,28 @@ void MainWindow::on_bgRadioButton_clicked()
 void MainWindow::on_segmentButton_clicked()
 {
     if (!fileName.isNull()) {
+        //qDebug() << image.width() << image.height() <<endl;
+        QVector<QPoint> test_fore;
+        QVector<QPoint> test_back;
+        test_fore += QPoint(0,1);
+        test_fore += QPoint(1,0);
+        test_back += QPoint(3,2);
+        test_back += QPoint(2,3);
+
         setSigma();
-        qDebug()<< image.width() << image.height() <<endl;
+        //cout << negBetaSigma;
 
         MatrixXf L = getLMatrix();
-        qDebug() << L(0,0) << endl;
+
+        MatrixXf I = getIMatrix(test_fore, test_back);
+        MatrixXf A = I + L*L;
+        VectorXf B = getBVector(test_fore, test_back);
+
+        // Apparently there are other options for an Ax=b solver.
+        // We could take some time to choose the best.
+        Eigen::colPivHouseholderQr<MatrixXf> QR(A);
+        VectorXf X = QR.solve();
+        cout << X << endl;
     }
 }
 
@@ -138,10 +155,9 @@ void MainWindow::setSigma() {
         // If sigma = 0, the image is all the same color.
         // Weights don't matter as long as they're all equal.
         negBetaSigma = 0;
-    cout << negBetaSigma;
 }
 
-// Simple equation from the paper.
+// Simple equation from the paper.1li
 float MainWindow::weight(QColor i, QColor j)
 {
     return exp(negBetaSigma * norm(i,j)) + 0.000001;
@@ -150,12 +166,10 @@ float MainWindow::weight(QColor i, QColor j)
 // L = D - W
 MatrixXf MainWindow::getLMatrix()
 {
-    qDebug() << "wow!";
     int h = image.height();
     int w = image.width();
     // Dynamic initialization of square matrix, length = rows*cols
     MatrixXf L = MatrixXf::Zero(h*w, h*w);
-    qDebug()<< "sheeesh\n" <<endl;
 
     // Iterators
     int r, c, n;
@@ -168,9 +182,8 @@ MatrixXf MainWindow::getLMatrix()
             pix = image.pixel(c,r);
             QVector<QPoint> neighs = neighbors(c, r);
 
-            qDebug() << c << " " << r << endl;
+            //qDebug() << c << " " << r << endl;
             // For each neighbor:
-            cout << c << "=c, r=" << r << '\n';
             for (n=0; n<neighs.length(); n++) {
                 // Get the neighbor's color
                 neigh = image.pixel(neighs[n]);
@@ -184,4 +197,45 @@ MatrixXf MainWindow::getLMatrix()
         }
     }
     return L;
+}
+
+
+MatrixXf MainWindow::getIMatrix(QVector<QPoint> fore, QVector<QPoint> back) {
+    int w = image.width();
+    int N = image.height() * w;
+    MatrixXf I = MatrixXf::Zero(N, N);
+
+    int i, r, c;
+    for(i=0; i<fore.length(); i++) {
+        r = fore[i].y();
+        c = fore[i].x();
+        I(r*w+c, r*w+c) = 1.0;
+    }
+    for(i=0; i<back.length(); i++) {
+        r = back[i].y();
+        c = back[i].x();
+        I(r*w+c, r*w+c) = 1.0;
+    }
+
+    return I;
+}
+
+// We could get this at the same time as I, for elegancy/speed.
+VectorXf MainWindow::getBVector(QVector<QPoint> fore, QVector<QPoint> back) {
+    int w = image.width();
+    VectorXf B = VectorXf::Zero(image.height() * w);
+
+    int i, r, c;
+    for(i=0; i<fore.length(); i++) {
+        r = fore[i].y();
+        c = fore[i].x();
+        B(r*w+c) = 1.0;
+    }
+    for(i=0; i<back.length(); i++) {
+        r = back[i].y();
+        c = back[i].x();
+        B(r*w+c) = -1.0;
+    }
+
+    return B;
 }

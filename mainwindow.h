@@ -1,11 +1,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+using namespace std;
+
 #include <QMainWindow>
 #include <QList>
 
-#include <Eigen/Core>
+#include <Eigen>
+using namespace Eigen;
 using Eigen::MatrixXf;
+using Eigen::VectorXf;
+using Eigen::colPivHouseholderQr;
 
 
 namespace Ui {
@@ -47,8 +52,8 @@ class MainWindow : public QMainWindow
         void setSigma();
         float weight(QColor, QColor);
         MatrixXf getLMatrix();
-
-
+        MatrixXf getIMatrix(QVector<QPoint> fore, QVector<QPoint> back);
+        VectorXf getBVector(QVector<QPoint> fore, QVector<QPoint> back);
 
 };
 
