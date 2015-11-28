@@ -10,7 +10,7 @@ using namespace std;
 using namespace Eigen;
 using Eigen::MatrixXf;
 using Eigen::VectorXf;
-using Eigen::colPivHouseholderQr;
+using Eigen::ColPivHouseholderQR;
 
 
 namespace Ui {

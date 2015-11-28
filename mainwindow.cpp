@@ -63,8 +63,7 @@ void MainWindow::on_segmentButton_clicked()
 {
     if (!fileName.isNull()) {
         //qDebug() << image.width() << image.height() <<endl;
-        QVector<QPoint> test_fore;
-        QVector<QPoint> test_back;
+        QVector<QPoint> test_fore, test_back;
         test_fore += QPoint(0,1);
         test_fore += QPoint(1,0);
         test_back += QPoint(3,2);
@@ -74,16 +73,29 @@ void MainWindow::on_segmentButton_clicked()
         //cout << negBetaSigma;
 
         MatrixXf L = getLMatrix();
-
         MatrixXf I = getIMatrix(test_fore, test_back);
-        MatrixXf A = I + L*L;
         VectorXf B = getBVector(test_fore, test_back);
+        MatrixXf A = I + L*L;
 
         // Apparently there are other options for an Ax=b solver.
         // We could take some time to choose the best.
-        Eigen::colPivHouseholderQr<MatrixXf> QR(A);
-        VectorXf X = QR.solve();
-        cout << X << endl;
+        VectorXf X = A.colPivHouseholderQr().solve(B);
+        //cout << X << endl;
+
+        QVector<QPoint> final_fore, final_back;
+        QPoint pix;
+        int i;
+        for (i=0; i<X.size(); i++) {
+            // Integer division will give the value rounded down
+            pix = QPoint(i/image.width(), i%image.width());
+            cout << pix.x() << ' ' << pix.y() << ' '<< X[i] << endl;
+            if (X[i] < 0)
+                final_back += pix;
+            else
+                final_fore += pix;
+        }
+        //cout << final_back << endl;
+        //cout << final_fore << endl;
     }
 }
 
