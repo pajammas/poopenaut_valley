@@ -8,33 +8,27 @@
 class mywidget : public QWidget
 {
     Q_OBJECT
-private:
-    QImage image;
-    QRgb currentSeed;
-    QList<int> ForegroundX;
-    QList<int> ForegroundY;
-    QList<int> BackgroundX;
-    QList<int> BackgroundY;
-    void ReturnBackgroundX(int[]);
-    void ReturnBackgroundY(int[]);
-    void ReturnForegroundX(int[]);
-    void ReturnForegroundY(int[]);
 
+    private:
+        QImage image;
+        QRgb currentSeed;
+        QVector<QPoint> foregroundList;
+        QVector<QPoint> backgroundList;
 
-public:
-    explicit mywidget(QWidget *parent = 0);
+    public:
+        explicit mywidget(QWidget *parent = 0);
 
-    void setImage(QImage& image);
+        void setImage(QImage& image);
 
-    void setCurrentSeedColor(QRgb currentSeed);
+        void setCurrentSeedColor(QRgb currentSeed);
 
-    void paintEvent(QPaintEvent * e);
+        QVector<QPoint> getBackground();
 
-    void mouseMoveEvent(QMouseEvent * e);
+        QVector<QPoint> getForeground();
 
-signals:
+        void paintEvent(QPaintEvent * e);
 
-public slots:
+        void mouseMoveEvent(QMouseEvent * e);
 };
 
 #endif // MYWIDGET_H

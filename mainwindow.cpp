@@ -15,8 +15,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     // QString initializes to NULL
     fileName = QString();
-    beta = 1.0;
-    currentSeedColor = qRgb(12,175,243);
+    // beta = 1.0;   //talked with Josito and he suggested to use 400
+    beta = 400.0;
+
+    currentSeedColor = qRgb(12, 175, 243);
     ui->widget->setCurrentSeedColor(currentSeedColor);
 }
 
@@ -42,14 +44,14 @@ void MainWindow::on_selectImageButton_clicked()
                                 tr("Image Files (*.png *.jpg *.jpeg *.bmp)"));
 
     image.load(fileName);
-    // Make a resized copy, don't resize the image itself.
-    QImage display_img = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
-    ui->widget->setImage(display_img);
+    //QImage display_img = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
+    //ui->widget->setImage(display_img);
+    ui->widget->setImage(image);
 }
 
 void MainWindow::on_fgRadioButton_clicked()
 {
-    currentSeedColor = qRgb(12,175,243);
+    currentSeedColor = qRgb(12, 175, 243);
     ui->widget->setCurrentSeedColor(currentSeedColor);
 }
 
@@ -63,11 +65,8 @@ void MainWindow::on_segmentButton_clicked()
 {
     if (!fileName.isNull()) {
         //qDebug() << image.width() << image.height() <<endl;
-        QVector<QPoint> test_fore, test_back;
-        test_fore += QPoint(0,1);
-        test_fore += QPoint(1,0);
-        test_back += QPoint(3,2);
-        test_back += QPoint(2,3);
+        QVector<QPoint> test_fore = ui->widget->getForeground();
+        QVector<QPoint> test_back = ui->widget->getBackground();
 
         setSigma();
         //cout << negBetaSigma;
@@ -84,16 +83,24 @@ void MainWindow::on_segmentButton_clicked()
 
         QVector<QPoint> final_fore, final_back;
         QPoint pix;
+        QImage finalImage(image.width(), image.height(), QImage::Format_RGB32);
         int i;
         for (i=0; i<X.size(); i++) {
             // Integer division will give the value rounded down
-            pix = QPoint(i/image.width(), i%image.width());
+            pix = QPoint(i%image.width(), i/image.width());
             cout << pix.x() << ' ' << pix.y() << ' '<< X[i] << endl;
-            if (X[i] < 0)
+            if (X[i] < 0){
                 final_back += pix;
-            else
+                finalImage.setPixel(pix, qRgb(255, 255, 255));
+            }
+            else {
                 final_fore += pix;
+                finalImage.setPixel(pix, qRgb(0, 0, 0));
+            }
         }
+
+        image = finalImage.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
+        ui->widget->setImage(image);
         //cout << final_back << endl;
         //cout << final_fore << endl;
     }
@@ -139,8 +146,11 @@ int norm(QColor i, QColor j)
 // This function will set sigma, as well as negBetaSigma for later use.
 void MainWindow::setSigma() {
     // Sigma is the maximum norm of the image.
-    sigma = 0;
-
+    sigma = 0.1;
+    /* According to paper sigma should be equal to 0.1 ups ^__^
+     * I mean good try and well done, and girls will like your for loops
+     *  with c and r instead of i,j buuuuuut.... you knoooow....
+     *
     // Iterators
     int r, c, n;
     QColor pix, neigh;
@@ -160,6 +170,7 @@ void MainWindow::setSigma() {
             }
         }
     }
+    */
     // Make sure we never divide by zero.
     if (sigma != 0)
         negBetaSigma = (-1 * beta) / sigma;
@@ -200,10 +211,11 @@ MatrixXf MainWindow::getLMatrix()
                 // Get the neighbor's color
                 neigh = image.pixel(neighs[n]);
 
+                double currentWeight = weight(pix, neigh);
                 // This is an element of the W matrix. Negative.
-                L(r*w+c, neighs[n].y()*w + neighs[n].x()) -= weight(pix, neigh);
+                L(r*w+c, neighs[n].y()*w + neighs[n].x()) = -currentWeight;
                 // Element of D matrix. Accumulate all the weights of pix.
-                L(r*w+c, r*w+c) += weight(pix, neigh);
+                L(r*w+c, r*w+c) += currentWeight;
                 // To avoid more calls to weight(), we could use the W entry.
             }
         }
