@@ -31,6 +31,8 @@ void mywidget::mouseMoveEvent(QMouseEvent * e)
     int x = e->x();
     int y = e->y();
 
+    QImage display_image = image.copy();
+
     if (e->buttons() == Qt::LeftButton)
     {
         image.setPixel(QPoint(x, y), currentSeed);

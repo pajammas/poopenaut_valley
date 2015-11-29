@@ -16,10 +16,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    // QString initializes to NULL
-    fileName = QString();
     currentSeedColor = qRgb(12,175,243);
     ui->widget->setCurrentSeedColor(currentSeedColor);
+    image = QImage();
 }
 
 MainWindow::~MainWindow()
@@ -38,7 +37,7 @@ void MainWindow::on_resetButton_clicked()
 void MainWindow::on_selectImageButton_clicked()
 {
     // Open a dialog to select a file
-    fileName = QFileDialog::getOpenFileName(this,
+    QString fileName = QFileDialog::getOpenFileName(this,
                                 tr("Select Image"),
                                 "/home/duncan/Downloads",
                                 tr("Image Files (*.png *.jpg *.jpeg *.bmp)"));
@@ -46,7 +45,8 @@ void MainWindow::on_selectImageButton_clicked()
     image.load(fileName);
     // Make a resized copy, don't resize the image itself.
     image = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
-    ui->widget->setImage(image);
+    displayImage = image.copy();
+    ui->widget->setImage(displayImage);
 }
 
 void MainWindow::on_fgRadioButton_clicked()
@@ -63,7 +63,7 @@ void MainWindow::on_bgRadioButton_clicked()
 
 void MainWindow::on_segmentButton_clicked()
 {
-    if (fileName.isNull()) {
+    if (image.isNull()) {
         cout << "No image selected." << endl;
         return;
     }    
@@ -75,7 +75,6 @@ void MainWindow::on_segmentButton_clicked()
     // This is where the magic happens
     QVector<QPoint> final_fore = Segmenter(image).segment(fore, back);
 
-    QImage finalImage(image.width(), image.height(), QImage::Format_RGB32);
     QPoint pix;
     int r, c;
 
@@ -84,15 +83,13 @@ void MainWindow::on_segmentButton_clicked()
             pix = QPoint(c, r);
             
             if (final_fore.contains(pix)) {
-                finalImage.setPixel(pix, qRgb(255, 255, 255));
+                displayImage.setPixel(pix, qRgb(255, 255, 255));
             }
             else {
-                finalImage.setPixel(pix, qRgb(0, 0, 0));
+                displayImage.setPixel(pix, qRgb(0, 0, 0));
             }
         }
     }
 
-    //image = finalImage.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
-    finalImage = finalImage.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
-    ui->widget->setImage(finalImage);
+    ui->widget->setImage(displayImage);
 }

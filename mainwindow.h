@@ -34,9 +34,8 @@ class MainWindow : public QMainWindow
 
     private:
         Ui::MainWindow *ui;
-        QString fileName;
         // Maybe we should avoid storing this in multiple places.
-        QImage image;
+        QImage image, displayImage;
         QRgb currentSeedColor;
 
 };

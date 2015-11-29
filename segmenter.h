@@ -10,7 +10,7 @@ using namespace Eigen;
 class Segmenter 
 {
     public:
-        explicit Segmenter(QString);
+        explicit Segmenter(QImage);
         ~Segmenter();
         QVector<QPoint> segment(QVector<QPoint>, QVector<QPoint>);
 
