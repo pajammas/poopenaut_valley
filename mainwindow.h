@@ -1,16 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-using namespace std;
+// Should we put as many includes as possible here?
 
 #include <QMainWindow>
 #include <QList>
 
-#include <Eigen>
-using namespace Eigen;
-using Eigen::MatrixXf;
-using Eigen::VectorXf;
-using Eigen::ColPivHouseholderQR;
+using namespace std;
 
 
 namespace Ui {
@@ -39,21 +35,9 @@ class MainWindow : public QMainWindow
     private:
         Ui::MainWindow *ui;
         QString fileName;
+        // Maybe we should avoid storing this in multiple places.
         QImage image;
         QRgb currentSeedColor;
-        float beta;
-        // Don't really need sigma saved.
-        int sigma;
-        // Only compute -1*beta/sigma once.
-        float negBetaSigma;
-
-        QVector<QPoint> neighbors(int, int);
-        bool inBounds(int, int);
-        void setSigma();
-        float weight(QColor, QColor);
-        MatrixXf getLMatrix();
-        MatrixXf getIMatrix(QVector<QPoint> fore, QVector<QPoint> back);
-        VectorXf getBVector(QVector<QPoint> fore, QVector<QPoint> back);
 
 };
 

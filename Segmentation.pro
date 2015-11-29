@@ -13,11 +13,13 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    mywidget.cpp
+           mainwindow.cpp \
+           mywidget.cpp \
+    segmenter.cpp
 
 HEADERS  += mainwindow.h \
-    mywidget.h
+            mywidget.h \
+    segmenter.h
 
 FORMS    += mainwindow.ui
 
