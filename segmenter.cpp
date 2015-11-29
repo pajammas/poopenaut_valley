@@ -13,8 +13,8 @@ using namespace Eigen;
 #define BETA_VALUE 400.0
 
 
-Segmenter::Segmenter(QString fileName) {
-    image.load(fileName);
+Segmenter::Segmenter(QImage imageIn) {
+    image = imageIn;
     h = image.height();
     w = image.width();
     beta = BETA_VALUE;

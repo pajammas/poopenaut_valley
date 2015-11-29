@@ -17,7 +17,7 @@ void mywidget::paintEvent(QPaintEvent * e)
 
 void mywidget::setImage(QImage& imageIn)
 {
-    image = imageIn; //in order for mainwindow to ACTUALLY paint a pic
+    image = imageIn; //in order for mainwindow to ACTUALLY paint a picture
     update();
 }
 
@@ -31,7 +31,7 @@ void mywidget::mouseMoveEvent(QMouseEvent * e)
     int x = e->x();
     int y = e->y();
 
-    if (e->buttons() == Qt::RightButton)
+    if (e->buttons() == Qt::LeftButton)
     {
         image.setPixel(QPoint(x, y), currentSeed);
         image.setPixel(QPoint(x - 1, y), currentSeed);

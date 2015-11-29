@@ -45,9 +45,8 @@ void MainWindow::on_selectImageButton_clicked()
 
     image.load(fileName);
     // Make a resized copy, don't resize the image itself.
-    QImage display_img = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
-    ui->widget->setImage(display_img);
-    //ui->widget->setImage(image);
+    image = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
+    ui->widget->setImage(image);
 }
 
 void MainWindow::on_fgRadioButton_clicked()
@@ -74,7 +73,7 @@ void MainWindow::on_segmentButton_clicked()
     back = ui->widget->getBackground();
     
     // This is where the magic happens
-    QVector<QPoint> final_fore = Segmenter(fileName).segment(fore, back);
+    QVector<QPoint> final_fore = Segmenter(image).segment(fore, back);
 
     QImage finalImage(image.width(), image.height(), QImage::Format_RGB32);
     QPoint pix;
