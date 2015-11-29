@@ -16,7 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     // QString initializes to NULL
     fileName = QString();
-    currentSeedColor = qRgb(12,175,243);
+    
+    currentSeedColor = qRgb(12, 175, 243);
     ui->widget->setCurrentSeedColor(currentSeedColor);
 }
 
@@ -42,14 +43,14 @@ void MainWindow::on_selectImageButton_clicked()
                                 tr("Image Files (*.png *.jpg *.jpeg *.bmp)"));
 
     image.load(fileName);
-    // Make a resized copy, don't resize the image itself.
-    QImage display_img = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
-    ui->widget->setImage(display_img);
+    //QImage display_img = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
+    //ui->widget->setImage(display_img);
+    ui->widget->setImage(image);
 }
 
 void MainWindow::on_fgRadioButton_clicked()
 {
-    currentSeedColor = qRgb(12,175,243);
+    currentSeedColor = qRgb(12, 175, 243);
     ui->widget->setCurrentSeedColor(currentSeedColor);
 }
 

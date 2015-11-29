@@ -10,7 +10,7 @@ using namespace std;
 using namespace Eigen;
 
 
-#define BETA_VALUE 1.0
+#define BETA_VALUE 400.0
 
 
 Segmenter::Segmenter(QString fileName) {
