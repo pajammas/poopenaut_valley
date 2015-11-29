@@ -28,8 +28,13 @@ Segmenter::~Segmenter() {}
 // This function will find sigma and set negBetaSigma for later use.
 void Segmenter::setSigma() {
     // Sigma is the maximum norm of the image.
-    int sigma = 0;
-
+    float sigma = 0.1;
+    
+    /* According to paper sigma should be equal to 0.1 ups ^__^
+     * I mean good try and well done, and girls will like your for loops
+     *  with c and r instead of i,j buuuuuut.... you knoooow....
+     *
+    
     // Iterators for rows, columns, and neighbors
     int r, c, n;
     QColor pix, neigh;
@@ -53,6 +58,8 @@ void Segmenter::setSigma() {
             }
         }
     }
+    */
+
     // If sigma == 0, the image is all the same color.
     // The weight values don't matter as long as they're all equal.
     if (sigma == 0)
@@ -82,7 +89,7 @@ QVector<QPoint> Segmenter::segment(QVector<QPoint> fore, QVector<QPoint> back) {
     
     for (i=0; i<X.size(); i++) {
         // Integer division will always round the value down (floor).
-        pix = QPoint(i/w, i%w);
+        pix = QPoint(i%w, i/w);
         cout << pix.x() << ' ' << pix.y() << ' ' << X[i] << endl;
 
         if (X[i] > 0)

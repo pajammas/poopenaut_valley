@@ -8,6 +8,8 @@
 #include <QFileDialog>
 #include <QPainter>
 
+//#define FG_COLOR qRgb(12,175,243)
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,21 +18,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     // QString initializes to NULL
     fileName = QString();
-    
-    currentSeedColor = qRgb(12, 175, 243);
+    currentSeedColor = qRgb(12,175,243);
     ui->widget->setCurrentSeedColor(currentSeedColor);
 }
 
 MainWindow::~MainWindow()
-    { delete ui; }
+{
+    delete ui;
+}
 
-// Make this work again?
-// Maybe have a "clear seeds" button as well?
 void MainWindow::on_resetButton_clicked()
 {
     //ui->imageLabel->clear();
     //ui->imageLabel->setText("No image selected...");
-    fileName.clear();
+    //fileName.clear();
 }
 
 
@@ -43,14 +44,15 @@ void MainWindow::on_selectImageButton_clicked()
                                 tr("Image Files (*.png *.jpg *.jpeg *.bmp)"));
 
     image.load(fileName);
-    //QImage display_img = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
-    //ui->widget->setImage(display_img);
-    ui->widget->setImage(image);
+    // Make a resized copy, don't resize the image itself.
+    QImage display_img = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
+    ui->widget->setImage(display_img);
+    //ui->widget->setImage(image);
 }
 
 void MainWindow::on_fgRadioButton_clicked()
 {
-    currentSeedColor = qRgb(12, 175, 243);
+    currentSeedColor = qRgb(12,175,243);
     ui->widget->setCurrentSeedColor(currentSeedColor);
 }
 
@@ -65,16 +67,33 @@ void MainWindow::on_segmentButton_clicked()
     if (fileName.isNull()) {
         cout << "No image selected." << endl;
         return;
+    }    
+ 
+    QVector<QPoint> fore, back;
+    fore = ui->widget->getForeground();
+    back = ui->widget->getBackground();
+    
+    // This is where the magic happens
+    QVector<QPoint> final_fore = Segmenter(fileName).segment(fore, back);
+
+    QImage finalImage(image.width(), image.height(), QImage::Format_RGB32);
+    QPoint pix;
+    int r, c;
+
+    for (c=0; c<image.width(); c++) {
+        for (r=0; r<image.height(); r++) {
+            pix = QPoint(c, r);
+            
+            if (final_fore.contains(pix)) {
+                finalImage.setPixel(pix, qRgb(255, 255, 255));
+            }
+            else {
+                finalImage.setPixel(pix, qRgb(0, 0, 0));
+            }
+        }
     }
 
-    //qDebug() << image.width() << image.height() <<endl;
-    QVector<QPoint> test_fore, test_back;
-    test_fore += QPoint(0,0);
-    test_back += QPoint(3,2);
-    test_back += QPoint(2,3);
-
-    QVector<QPoint> final_fore;
-    final_fore = Segmenter(fileName).segment(test_fore, test_back);
- 
-    // Now do something with it!!
+    //image = finalImage.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
+    finalImage = finalImage.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
+    ui->widget->setImage(finalImage);
 }
