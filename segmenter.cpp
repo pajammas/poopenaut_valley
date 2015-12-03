@@ -4,10 +4,23 @@
 #include <cmath>
 
 #include <QColor>
-//#include <Eigen>
-//#include <Eigen/Core>
-//#include <Eigen/Sparse>
 #include <Eigen/SparseCholesky>
+
+/* Known Bugs:
+ *
+ * Fuck scaling. Just, fuck it. Reasons why:
+ * Doesn't seem mathy to process the rescaled version
+ * Out of bounds seeding errors
+ *
+ * Duplicates showing up in seed vectors, causing bugs with sparse insert
+ *
+ * Segmentation *might* be working??
+ *
+ * Nasty UI
+ *
+ * Slow as fuck. It's possible that building vectors is the problem.
+ *
+ * /
 
 using namespace std;
 using namespace Eigen;
@@ -91,6 +104,7 @@ QVector<QPoint> Segmenter::segment(QVector<QPoint> fore, QVector<QPoint> back) {
         cout << "Error: couldn't decompose A." << endl;
         return QVector<QPoint>();
     }
+
     cout << "solving!" <<endl ;
     VectorXd X = solver.solve(B);
     if (solver.info() != Success) {
@@ -122,15 +136,15 @@ QVector<QPoint> Segmenter::segment(QVector<QPoint> fore, QVector<QPoint> back) {
 SparseMatrix<double> Segmenter::getLMatrix() {
 
     SparseMatrix<double> L(h*w, h*w);
-    //There will be at most, 5 entries per column:
+    //There will be at most 5 entries per column:
     // 4 from W and 1 from D
     L.reserve(VectorXi::Constant(h*w, 5));
 
     // Iterators for columns, rows, and neighbors
     int c, r, n;
-    double this_weight;
-    QColor pix, neigh;
     QVector<QPoint> neighs;
+    QColor pix, neigh;
+    double this_weight;
 
     for (c=0; c<w; c++) {
         for (r=0; r<h; r++) {
