@@ -4,7 +4,10 @@
 #include <cmath>
 
 #include <QColor>
-#include <Eigen/QR>
+//#include <Eigen>
+//#include <Eigen/Core>
+//#include <Eigen/Sparse>
+#include <Eigen/SparseCholesky>
 
 using namespace std;
 using namespace Eigen;
@@ -28,7 +31,7 @@ Segmenter::~Segmenter() {}
 // This function will find sigma and set negBetaSigma for later use.
 void Segmenter::setSigma() {
     // Sigma is the maximum norm of the image.
-    float sigma = 0.1;
+    double sigma = 0.1;
     
     /* According to paper sigma should be equal to 0.1 ups ^__^
      * I mean good try and well done, and girls will like your for loops
@@ -73,24 +76,37 @@ void Segmenter::setSigma() {
 // All other points lie in the background.
 QVector<QPoint> Segmenter::segment(QVector<QPoint> fore, QVector<QPoint> back) {
 
-    MatrixXf L = getLMatrix();
-    MatrixXf I = getIMatrix(fore, back);
-    VectorXf B = getBVector(fore, back);
-    MatrixXf A = I + L*L;
+    // We should optimize so these aren't all stored at once. pass references??
+    SparseMatrix<double> L = getLMatrix();
+    SparseMatrix<double> A = getIMatrix(fore, back) + L*L;
+    A.makeCompressed();
+
+    VectorXd B = getBVector(fore, back);
 
     // Apparently there are other options for an Ax=b solver.
     // We could take some time to choose the best.
-    VectorXf X = A.colPivHouseholderQr().solve(B);
-    //cout << X << endl;
+    // Construct a 'solver' object using A
+    SimplicialCholesky< SparseMatrix<double> > solver(A);
+    if (solver.info() != Success) {
+        cout << "Error: couldn't decompose A." << endl;
+        return QVector<QPoint>();
+    }
+    cout << "solving!" <<endl ;
+    VectorXd X = solver.solve(B);
+    if (solver.info() != Success) {
+        cout << "Error: couldn't solve AX=B." << endl;
+        return QVector<QPoint>();
+    }
+
 
     QVector<QPoint> final_fore;
     QPoint pix;
     int i;
-    
+
     for (i=0; i<X.size(); i++) {
         // Integer division will always round the value down (floor).
         pix = QPoint(i%w, i/w);
-        cout << pix.x() << ' ' << pix.y() << ' ' << X[i] << endl;
+        //cout << pix.x() << ' ' << pix.y() << ' ' << X[i] << endl;
 
         if (X[i] > 0)
             final_fore += pix;
@@ -103,12 +119,16 @@ QVector<QPoint> Segmenter::segment(QVector<QPoint> fore, QVector<QPoint> back) {
 // L = D - W
 // D is a diagonal matrix with the weighted valency of each pixel.
 // W is a matrix containing the edge weights between all pixels.
-MatrixXf Segmenter::getLMatrix() {
-    // Dynamic initialization of square matrix, N = rows*cols
-    MatrixXf L = MatrixXf::Zero(h*w, h*w);
+SparseMatrix<double> Segmenter::getLMatrix() {
+
+    SparseMatrix<double> L(h*w, h*w);
+    //There will be at most, 5 entries per column:
+    // 4 from W and 1 from D
+    L.reserve(VectorXi::Constant(h*w, 5));
 
     // Iterators for columns, rows, and neighbors
     int c, r, n;
+    double this_weight;
     QColor pix, neigh;
     QVector<QPoint> neighs;
 
@@ -123,56 +143,64 @@ MatrixXf Segmenter::getLMatrix() {
             for (n=0; n<neighs.size(); n++) {
                 // Get the neighbor's color
                 neigh = image.pixel(neighs[n]);
+                this_weight = weight(pix, neigh);
 
                 // This part is an element of the W matrix. Negate it.
-                L(r*w+c, neighs[n].y()*w + neighs[n].x()) -= weight(pix, neigh);
+                // insert() must create a new entry
+                L.insert(r*w+c, neighs[n].y()*w + neighs[n].x()) = -1 * this_weight;
+            
                 // An element of D matrix. Accumulate all the weights of pix.
-                L(r*w+c, r*w+c) += weight(pix, neigh);
-                // To avoid more calls to weight(), we could use the W entry.
+                // coeffRef can add to a previous entry
+                L.coeffRef(r*w+c, r*w+c) += this_weight;
             }
         }
     }
+    L.makeCompressed();
     return L;
 }
 
 // I is a diagonal matrix which has 1's only for the pixels
 // which are members of the foreground or the background.
-MatrixXf Segmenter::getIMatrix(QVector<QPoint> fore, QVector<QPoint> back) {
-    MatrixXf I = MatrixXf::Zero(w*h, w*h);
+SparseMatrix<double> Segmenter::getIMatrix(QVector<QPoint> fore, QVector<QPoint> back) {
+
+    SparseMatrix<double> I(h*w, h*w);
+    // There will be at most 1 entry per column (it's diagonal)
+    I.reserve(VectorXi::Constant(h*w, 1));
 
     int i, r, c;
-
+          
     for(i=0; i<fore.size(); i++) {
         r = fore[i].y();
         c = fore[i].x();
-        I(r*w+c, r*w+c) = 1.0;
+        I.insert(r*w+c, r*w+c) = 1.0;
     }
     for(i=0; i<back.size(); i++) {
         r = back[i].y();
         c = back[i].x();
-        I(r*w+c, r*w+c) = 1.0;
+        I.insert(r*w+c, r*w+c) = 1.0;
     }
 
+    I.makeCompressed();
     return I;
 }
 
 // We could get this at the same time as I, for elegancy/speed.
 // B tells which seed set, if any, each pixel is part of.
 // The choice of 1.0, -1.0 as labels is arbitrary.
-VectorXf Segmenter::getBVector(QVector<QPoint> fore, QVector<QPoint> back) {
-    VectorXf B = VectorXf::Zero(h*w);
+VectorXd Segmenter::getBVector(QVector<QPoint> fore, QVector<QPoint> back) {
+    VectorXd B(h*w);
 
     int i, r, c;
 
     for(i=0; i<fore.size(); i++) {
         r = fore[i].y();
         c = fore[i].x();
-        B(r*w+c) = 1.0;
+        B[r*w+c] = 1.0;
     }
     for(i=0; i<back.size(); i++) {
         r = back[i].y();
         c = back[i].x();
-        B(r*w+c) = -1.0;
+        B[r*w+c] = 1.0;
     }
 
     return B;
@@ -208,7 +236,7 @@ bool Segmenter::inBounds(int x, int y)
     { return ((x>=0) && (y>=0) && (x<w) && (y<h)); }
 
 // Simple equation from the paper.1li
-float Segmenter::weight(QColor i, QColor j)
+double Segmenter::weight(QColor i, QColor j)
     { return exp(negBetaSigma * norm(i,j)) + 0.000001; }
 
 // This doesn't even need to be in the class.

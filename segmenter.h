@@ -3,6 +3,7 @@
 
 #include <QImage>
 #include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 using namespace Eigen;
 
@@ -19,18 +20,18 @@ class Segmenter
         // I'm lazy and don't want to call image.height()
         int h, w;
         // And it's faster just to compute negBetaSigma once.
-        float beta, negBetaSigma;
+        double beta, negBetaSigma;
 
         // Top-level helper functions
         void setSigma();
-        MatrixXf getLMatrix();
-        MatrixXf getIMatrix(QVector<QPoint>, QVector<QPoint>);
-        VectorXf getBVector(QVector<QPoint>, QVector<QPoint>);
+        SparseMatrix<double> getLMatrix();
+        SparseMatrix<double> getIMatrix(QVector<QPoint>, QVector<QPoint>);
+        VectorXd getBVector(QVector<QPoint>, QVector<QPoint>);
         
         // Basic helper functions.
         QVector<QPoint> neighbors(int, int);
         bool inBounds(int, int);
-        float weight(QColor, QColor);
+        double weight(QColor, QColor);
 };
 
 int norm(QColor, QColor);
