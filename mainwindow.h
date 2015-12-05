@@ -26,17 +26,15 @@ class MainWindow : public QMainWindow
 
         void on_selectImageButton_clicked();
 
-        void on_fgRadioButton_clicked();
+        void on_segmentButton_clicked();
 
+        void on_fgRadioButton_clicked();
         void on_bgRadioButton_clicked();
 
-        void on_segmentButton_clicked();
 
     private:
         Ui::MainWindow *ui;
-        // Maybe we should avoid storing this in multiple places.
         QImage image, displayImage;
-        QRgb currentSeedColor;
 
 };
 

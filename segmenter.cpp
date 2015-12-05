@@ -6,31 +6,28 @@
 #include <QColor>
 #include <Eigen/SparseCholesky>
 
+using namespace Eigen;
+
 /* Known Bugs:
  *
  * Fuck scaling. Just, fuck it. Reasons why:
  * Doesn't seem mathy to process the rescaled version
  * Out of bounds seeding errors
  *
- * Duplicates showing up in seed vectors, causing bugs with sparse insert
- *
  * Segmentation *might* be working??
- *
- * Nasty UI
  *
  * Slow as fuck. It's possible that building vectors is the problem.
  *
- * /
-
-using namespace std;
-using namespace Eigen;
+ * Mywidget needs a better name
+ *
+ */
 
 
 #define BETA_VALUE 400.0
 
 
-Segmenter::Segmenter(QImage imageIn) {
-    image = imageIn;
+Segmenter::Segmenter(QImage *imageIn) {
+    image = *imageIn;
     h = image.height();
     w = image.width();
     beta = BETA_VALUE;
@@ -38,8 +35,12 @@ Segmenter::Segmenter(QImage imageIn) {
     //cout << negBetaSigma;
 }
 
-Segmenter::~Segmenter() {}
+Segmenter::Segmenter() {
+    std::cout << "WARNING: Segmenter should be given an image upon construction." << std::endl
+         << "The object created with this call will not work." << std::endl;
+}
 
+Segmenter::~Segmenter() { }
 
 // This function will find sigma and set negBetaSigma for later use.
 void Segmenter::setSigma() {
@@ -87,7 +88,7 @@ void Segmenter::setSigma() {
 
 // This function returns the vector of points in the foreground.
 // All other points lie in the background.
-QVector<QPoint> Segmenter::segment(QVector<QPoint> fore, QVector<QPoint> back) {
+QVector<QPoint> Segmenter::segment(QVector<QPoint> *fore, QVector<QPoint> *back) {
 
     // We should optimize so these aren't all stored at once. pass references??
     SparseMatrix<double> L = getLMatrix();
@@ -101,14 +102,15 @@ QVector<QPoint> Segmenter::segment(QVector<QPoint> fore, QVector<QPoint> back) {
     // Construct a 'solver' object using A
     SimplicialCholesky< SparseMatrix<double> > solver(A);
     if (solver.info() != Success) {
-        cout << "Error: couldn't decompose A." << endl;
+        std::cout << "Error: couldn't decompose A." << std::endl;
         return QVector<QPoint>();
     }
 
-    cout << "solving!" <<endl ;
+    std::cout << "solving!" << std::endl;
+
     VectorXd X = solver.solve(B);
     if (solver.info() != Success) {
-        cout << "Error: couldn't solve AX=B." << endl;
+        std::cout << "Error: couldn't solve AX=B." << std::endl;
         return QVector<QPoint>();
     }
 
@@ -175,7 +177,7 @@ SparseMatrix<double> Segmenter::getLMatrix() {
 
 // I is a diagonal matrix which has 1's only for the pixels
 // which are members of the foreground or the background.
-SparseMatrix<double> Segmenter::getIMatrix(QVector<QPoint> fore, QVector<QPoint> back) {
+SparseMatrix<double> Segmenter::getIMatrix(QVector<QPoint> *fore, QVector<QPoint> *back) {
 
     SparseMatrix<double> I(h*w, h*w);
     // There will be at most 1 entry per column (it's diagonal)
@@ -183,14 +185,14 @@ SparseMatrix<double> Segmenter::getIMatrix(QVector<QPoint> fore, QVector<QPoint>
 
     int i, r, c;
           
-    for(i=0; i<fore.size(); i++) {
-        r = fore[i].y();
-        c = fore[i].x();
+    for(i=0; i < fore->size(); i++) {
+        r = (*fore)[i].y();
+        c = (*fore)[i].x();
         I.insert(r*w+c, r*w+c) = 1.0;
     }
-    for(i=0; i<back.size(); i++) {
-        r = back[i].y();
-        c = back[i].x();
+    for(i=0; i < back->size(); i++) {
+        r = (*back)[i].y();
+        c = (*back)[i].x();
         I.insert(r*w+c, r*w+c) = 1.0;
     }
 
@@ -201,19 +203,19 @@ SparseMatrix<double> Segmenter::getIMatrix(QVector<QPoint> fore, QVector<QPoint>
 // We could get this at the same time as I, for elegancy/speed.
 // B tells which seed set, if any, each pixel is part of.
 // The choice of 1.0, -1.0 as labels is arbitrary.
-VectorXd Segmenter::getBVector(QVector<QPoint> fore, QVector<QPoint> back) {
+VectorXd Segmenter::getBVector(QVector<QPoint> *fore, QVector<QPoint> *back) {
     VectorXd B(h*w);
 
     int i, r, c;
 
-    for(i=0; i<fore.size(); i++) {
-        r = fore[i].y();
-        c = fore[i].x();
+    for(i=0; i<fore->size(); i++) {
+        r = (*fore)[i].y();
+        c = (*fore)[i].x();
         B[r*w+c] = 1.0;
     }
-    for(i=0; i<back.size(); i++) {
-        r = back[i].y();
-        c = back[i].x();
+    for(i=0; i<back->size(); i++) {
+        r = (*back)[i].y();
+        c = (*back)[i].x();
         B[r*w+c] = 1.0;
     }
 
@@ -259,5 +261,5 @@ int norm(QColor i, QColor j) {
     int r = pow(i.red() - j.red(), 2);
     int g = pow(i.green() - j.green(), 2);
     int b = pow(i.blue() - j.blue(), 2);
-    return max(r, max(g, b));
+    return std::max(r, std::max(g, b));
 }

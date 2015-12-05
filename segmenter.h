@@ -11,9 +11,10 @@ using namespace Eigen;
 class Segmenter 
 {
     public:
-        explicit Segmenter(QImage);
+        Segmenter(QImage *);
+        Segmenter();
         ~Segmenter();
-        QVector<QPoint> segment(QVector<QPoint>, QVector<QPoint>);
+        QVector<QPoint> segment(QVector<QPoint> *, QVector<QPoint> *);
 
     private:
         QImage image;
@@ -25,8 +26,8 @@ class Segmenter
         // Top-level helper functions
         void setSigma();
         SparseMatrix<double> getLMatrix();
-        SparseMatrix<double> getIMatrix(QVector<QPoint>, QVector<QPoint>);
-        VectorXd getBVector(QVector<QPoint>, QVector<QPoint>);
+        SparseMatrix<double> getIMatrix(QVector<QPoint> *, QVector<QPoint> *);
+        VectorXd getBVector(QVector<QPoint> *, QVector<QPoint> *);
         
         // Basic helper functions.
         QVector<QPoint> neighbors(int, int);

@@ -1,12 +1,15 @@
 #include "mywidget.h"
 #include <QList>
 
+#define FG_COLOR qRgb(12, 175, 243)
+#define BG_COLOR qRgb(236, 0, 16)
+
+
 mywidget::mywidget(QWidget *parent) : QWidget(parent)
-{
+{}
 
-}
 
-void mywidget::paintEvent(QPaintEvent * e)
+void mywidget::paintEvent(QPaintEvent *e)
 {
     QPainter painter(this);
 
@@ -15,41 +18,47 @@ void mywidget::paintEvent(QPaintEvent * e)
     QWidget::paintEvent(e);
 }
 
-void mywidget::setImage(QImage& imageIn)
+
+void mywidget::setImage(QImage &imageIn)
 {
     image = imageIn; //in order for mainwindow to ACTUALLY paint a picture
     update();
 }
 
-void mywidget::setCurrentSeedColor(QRgb currentSeedIn)
+
+void mywidget::setCurrentSeed(int color)
 {
-    currentSeed = currentSeedIn;
+    if (color == 1) currentSeedColor = FG_COLOR;
+    else            currentSeedColor = BG_COLOR;
 }
 
-void mywidget::mouseMoveEvent(QMouseEvent * e)
+
+void mywidget::mouseMoveEvent(QMouseEvent *e)
 {
     int x = e->x();
     int y = e->y();
 
-    QImage display_image = image.copy();
+    QPoint p = QPoint(x, y);
 
-    if (e->buttons() == Qt::LeftButton)
+    if (!foregroundList.contains(p) &&
+        !backgroundList.contains(p) &&
+        (e->buttons() == Qt::LeftButton))
     {
-        image.setPixel(QPoint(x, y), currentSeed);
-        image.setPixel(QPoint(x - 1, y), currentSeed);
-        image.setPixel(QPoint(x + 1, y), currentSeed);
-        image.setPixel(QPoint(x, y - 1), currentSeed);
-        image.setPixel(QPoint(x + 1, y + 1), currentSeed);
-        update();
+            image.setPixel(p, currentSeedColor);
+            image.setPixel(QPoint(x-1, y), currentSeedColor);
+            image.setPixel(QPoint(x+1, y), currentSeedColor);
+            image.setPixel(QPoint(x,   y-1), currentSeedColor);
+            image.setPixel(QPoint(x+1, y+1), currentSeedColor);
+            update();
 
-        if (currentSeed == qRgb(12, 175, 243))
-        {
-            foregroundList.append(QPoint(x, y));
-        }
-        else
-        {
-            backgroundList.append(QPoint(x, y));
-        }
+            if (currentSeedColor == FG_COLOR)
+            {
+                foregroundList.append(p);
+            }
+            else
+            {
+                backgroundList.append(p);
+            }
     }
 }
 

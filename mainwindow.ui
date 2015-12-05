@@ -26,6 +26,12 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="mywidget" name="widget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
       <property name="mouseTracking">
        <bool>true</bool>
       </property>
@@ -39,27 +45,9 @@
     </item>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="QPushButton" name="resetButton">
-        <property name="text">
-         <string>Reset</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="segmentButton">
-        <property name="text">
-         <string>Segment</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="selectImageButton">
-        <property name="text">
-         <string>Select Image</string>
-        </property>
-       </widget>
-      </item>
+      <property name="spacing">
+       <number>6</number>
+      </property>
       <item>
        <widget class="QRadioButton" name="fgRadioButton">
         <property name="layoutDirection">
@@ -67,6 +55,9 @@
         </property>
         <property name="text">
          <string>Foreground</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -80,14 +71,34 @@
         </property>
        </widget>
       </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="selectImageButton">
+          <property name="text">
+           <string>Select Image</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="resetButton">
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="segmentButton">
+          <property name="text">
+           <string>Segment</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </item>
    </layout>
-   <zorder>resetButton</zorder>
-   <zorder>selectImageButton</zorder>
-   <zorder>segmentButton</zorder>
-   <zorder>widget</zorder>
-   <zorder>verticalLayoutWidget</zorder>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

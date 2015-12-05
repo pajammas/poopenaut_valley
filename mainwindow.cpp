@@ -1,14 +1,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "segmenter.h"
 
-#include <iostream>
+#include "segmenter.h"
+#include "mywidget.h"
+
 #include <cmath>
+#include <iostream>
 
 #include <QFileDialog>
-#include <QPainter>
 
-//#define FG_COLOR qRgb(12,175,243)
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -16,8 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    currentSeedColor = qRgb(12,175,243);
-    ui->widget->setCurrentSeedColor(currentSeedColor);
+    ui->widget->setCurrentSeed(1);
     image = QImage();
 }
 
@@ -51,14 +50,12 @@ void MainWindow::on_selectImageButton_clicked()
 
 void MainWindow::on_fgRadioButton_clicked()
 {
-    currentSeedColor = qRgb(12,175,243);
-    ui->widget->setCurrentSeedColor(currentSeedColor);
+    ui->widget->setCurrentSeed(1);
 }
 
 void MainWindow::on_bgRadioButton_clicked()
 {
-    currentSeedColor = qRgb(236,0,16);
-    ui->widget->setCurrentSeedColor(currentSeedColor);
+    ui->widget->setCurrentSeed(0);
 }
 
 void MainWindow::on_segmentButton_clicked()
@@ -73,7 +70,7 @@ void MainWindow::on_segmentButton_clicked()
     back = ui->widget->getBackground();
     
     // This is where the magic happens
-    QVector<QPoint> final_fore = Segmenter(image).segment(fore, back);
+    QVector<QPoint> final_fore = Segmenter(&image).segment(&fore, &back);
 
     QPoint pix;
     int r, c;
