@@ -26,6 +26,10 @@ void mywidget::setImage(QImage &imageIn)
 }
 
 
+bool mywidget::inBounds(int x, int y)
+    { return ((x>=0) && (y>=0) && (x<image.width()) && (y<image.height())); }
+
+
 void mywidget::setCurrentSeed(int color)
 {
     if (color == 1) currentSeedColor = FG_COLOR;
@@ -40,7 +44,8 @@ void mywidget::mouseMoveEvent(QMouseEvent *e)
 
     QPoint p = QPoint(x, y);
 
-    if (!foregroundList.contains(p) &&
+    if (inBounds(x, y) &&
+        !foregroundList.contains(p) &&
         !backgroundList.contains(p) &&
         (e->buttons() == Qt::LeftButton))
     {

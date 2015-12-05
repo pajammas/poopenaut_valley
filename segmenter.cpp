@@ -8,22 +8,27 @@
 
 using namespace Eigen;
 
-/* Known Bugs:
+#define BETA_VALUE 400.0
+
+/* Issues (in approximate order of importance):
  *
- * Fuck scaling. Just, fuck it. Reasons why:
- * Doesn't seem mathy to process the rescaled version
- * Out of bounds seeding errors
+ * Segmentation isn't working. Getting weird periodic artifacts instead.
+ * Input image appears to have no (or very little) effect on the output.
  *
- * Segmentation *might* be working??
+ * Slow as fuck. Computing the cholesky solver takes 30 times more time than anything else.
  *
- * Slow as fuck. It's possible that building vectors is the problem.
+ * Output image sometimes simply doesn't appear =( No idea why.
+ *
+ * Doesn't seem mathy to process the rescaled version of image
  *
  * Mywidget needs a better name
  *
+ * Cancelling file select window prints errors
+ * Drawing out of bounds does too
  */
 
-
-#define BETA_VALUE 400.0
+// For testing:
+ #include <time.h>
 
 
 Segmenter::Segmenter(QImage *imageIn) {
@@ -90,9 +95,21 @@ void Segmenter::setSigma() {
 // All other points lie in the background.
 QVector<QPoint> Segmenter::segment(QVector<QPoint> *fore, QVector<QPoint> *back) {
 
-    // We should optimize so these aren't all stored at once. pass references??
+    clock_t t = clock();
+    std::cout << "Starting...\n";
+    std::cout << "Time elapsed, in seconds: " << ((float)(clock()-t))/CLOCKS_PER_SEC << std::endl;
+
+    // We should optimize so these aren't all stored at once.
     SparseMatrix<double> L = getLMatrix();
+
+    std::cout << "L computed.\n";
+    std::cout << "Time elapsed, in seconds: " << ((float)(clock()-t))/CLOCKS_PER_SEC << std::endl;
+
     SparseMatrix<double> A = getIMatrix(fore, back) + L*L;
+
+    std::cout << "A computed.\n";
+    std::cout << "Time elapsed, in seconds: " << ((float)(clock()-t))/CLOCKS_PER_SEC << std::endl;
+
     A.makeCompressed();
 
     VectorXd B = getBVector(fore, back);
@@ -101,18 +118,23 @@ QVector<QPoint> Segmenter::segment(QVector<QPoint> *fore, QVector<QPoint> *back)
     // We could take some time to choose the best.
     // Construct a 'solver' object using A
     SimplicialCholesky< SparseMatrix<double> > solver(A);
+
     if (solver.info() != Success) {
         std::cout << "Error: couldn't decompose A." << std::endl;
         return QVector<QPoint>();
     }
 
-    std::cout << "solving!" << std::endl;
+    std::cout << "Solver created." << std::endl;
+    std::cout << "Time elapsed, in seconds: " << ((float)(clock()-t))/CLOCKS_PER_SEC << std::endl;
 
     VectorXd X = solver.solve(B);
     if (solver.info() != Success) {
         std::cout << "Error: couldn't solve AX=B." << std::endl;
         return QVector<QPoint>();
     }
+
+    std::cout << "Ax = b solved.\n";
+    std::cout << "Time elapsed, in seconds: " << ((float)(clock()-t))/CLOCKS_PER_SEC << std::endl;
 
 
     QVector<QPoint> final_fore;

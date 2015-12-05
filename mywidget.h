@@ -16,16 +16,16 @@ class mywidget : public QWidget
         QRgb currentSeedColor;
         QVector<QPoint> foregroundList;
         QVector<QPoint> backgroundList;
+        bool inBounds(int, int);
+        void paintEvent(QPaintEvent *);
+        void mouseMoveEvent(QMouseEvent *);
 
     public:
         explicit mywidget(QWidget *parent = 0);
-        void setImage(QImage &image);
+        void setImage(QImage &);
 
         // Integer representing the region. 1 for FG, 0 for BG
-        void setCurrentSeed(int seed);
-
-        void paintEvent(QPaintEvent *e);
-        void mouseMoveEvent(QMouseEvent *e);
+        void setCurrentSeed(int);
         
         QVector<QPoint> getBackground();
         QVector<QPoint> getForeground();
