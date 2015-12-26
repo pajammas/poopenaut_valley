@@ -10,6 +10,9 @@
 #include <QFileDialog>
 
 
+// for testing
+ #include <time.h>
+
 
 MainWindow::MainWindow(QWidget *parent) :    
     QMainWindow(parent),
@@ -27,9 +30,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_resetButton_clicked()
 {
-    //ui->imageLabel->clear();
-    //ui->imageLabel->setText("No image selected...");
-    //fileName.clear();
+    // Set the images back to NULL
+    image = QImage();
+    displayImage = QImage();
+    // Tell the display widget to reset as well
+    ui->widget->reset();
+    // Default setting is foreground
+    ui->fgRadioButton->setChecked(1);
 }
 
 
@@ -40,6 +47,7 @@ void MainWindow::on_selectImageButton_clicked()
                                 tr("Select Image"),
                                 "/home/duncan/Downloads",
                                 tr("Image Files (*.png *.jpg *.jpeg *.bmp)"));
+    if (fileName == NULL) return;
 
     image.load(fileName);
     // Make a resized copy, don't resize the image itself?
@@ -71,14 +79,21 @@ void MainWindow::on_segmentButton_clicked()
     
     // This is where the magic happens
     QVector<QPoint> final_fore = Segmenter(&image).segment(&fore, &back);
+
+    clock_t t = clock();
+    std::cout << "Starting...\n";
+    std::cout << "Time elapsed, in seconds: " << ((float)(clock()-t))/CLOCKS_PER_SEC << std::endl;
+
     QPoint pix;
     int i;
+    // Note: Avoid if statements in this loop! Huge slowdown.
     for (i=0; i<final_fore.size(); i++) {
         pix = QPoint(final_fore[i].x(), final_fore[i].y());
-        if (final_fore.contains(pix)) {
-            displayImage.setPixel(pix, qRgb(255, 255, 255));
-        }
+        displayImage.setPixel(pix, qRgb(255, 255, 255));
     }
+    std::cout << "Displaying image.\n";
+    std::cout << "Time elapsed, in seconds: " << ((float)(clock()-t))/CLOCKS_PER_SEC << std::endl;
+
 
     ui->widget->setImage(&displayImage);
 }

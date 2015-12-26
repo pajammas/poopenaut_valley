@@ -18,9 +18,7 @@ class Segmenter
 
     private:
         const QImage *image;
-        // I'm lazy and don't want to call image.height()
         int h, w;
-        // Save -1 * beta / sigma, as beta is never used alone.
         double beta, negBetaSigma;
 
         // Top-level helper functions

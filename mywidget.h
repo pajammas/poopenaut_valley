@@ -19,15 +19,16 @@ class mywidget : public QWidget
 
         // Integer representing the region. 1 for FG, 0 for BG
         void setCurrentSeed(int);
-        
         QVector<QPoint> getBackground();
         QVector<QPoint> getForeground();
+        void reset();
 
     private:
         QImage *image;
         QRgb currentSeedColor;
         QVector<QPoint> foregroundList;
         QVector<QPoint> backgroundList;
+
         bool inBounds(int, int);
         void paintEvent(QPaintEvent *);
         void mouseMoveEvent(QMouseEvent *);

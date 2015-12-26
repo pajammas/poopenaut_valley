@@ -7,8 +7,7 @@
 // Take this out when done debugging
 using namespace std;
 #include <iostream>
-#include <QDebug>
-#include <QString>
+
 
 mywidget::mywidget(QWidget *parent) :
     QWidget(parent)
@@ -40,10 +39,10 @@ void mywidget::paintEvent(QPaintEvent *e)
 
 bool mywidget::inBounds(int x, int y)
 {
-    return((x >= 0) 
-        && (y >= 0) 
-        && (x < (image->width()))
-        && (y < (image->height())) );
+    return((x >= 0) &&
+           (y >= 0) &&
+           (x < (image->width())) &&
+           (y < (image->height())) );
 }
 
 void mywidget::setCurrentSeed(int color)
@@ -57,20 +56,25 @@ void mywidget::mouseMoveEvent(QMouseEvent *e)
 {
     int x = e->x();
     int y = e->y();
-
     QPoint p = QPoint(x, y);
 
     if (image != NULL &&
         inBounds(x, y) &&
         !foregroundList.contains(p) &&
         !backgroundList.contains(p) &&
-        (e->buttons() == Qt::LeftButton))
+        e->buttons() == Qt::LeftButton )
     {
+            // Set this pixel as the seed color
             image->setPixel(p, currentSeedColor);
-            image->setPixel(QPoint(x-1, y), currentSeedColor);
-            image->setPixel(QPoint(x+1, y), currentSeedColor);
-            image->setPixel(QPoint(x,   y-1), currentSeedColor);
-            image->setPixel(QPoint(x+1, y+1), currentSeedColor);
+            
+            // Set 4-neighbor pixels as well for visibility
+            int i;
+            for (i=-1; i<2; i+=2) {
+                if (inBounds(x+i, y))
+                    image->setPixel(QPoint(x+i, y), currentSeedColor);
+                if (inBounds(x, y+i))
+                    image->setPixel(QPoint(x, y+i), currentSeedColor);
+            }
             update();
 
             if (currentSeedColor == FG_COLOR)
@@ -92,4 +96,13 @@ QVector<QPoint> mywidget::getBackground()
 QVector<QPoint> mywidget::getForeground()
 {
     return foregroundList;
+}
+
+void mywidget::reset() {
+    image->fill(qRgba(0,0,0,0));
+    update();
+    image = NULL;
+    setCurrentSeed(1);
+    foregroundList = QVector<QPoint>();
+    backgroundList = QVector<QPoint>();
 }
