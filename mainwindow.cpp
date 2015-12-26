@@ -71,20 +71,12 @@ void MainWindow::on_segmentButton_clicked()
     
     // This is where the magic happens
     QVector<QPoint> final_fore = Segmenter(&image).segment(&fore, &back);
-
     QPoint pix;
-    int r, c;
-
-    for (c=0; c<image.width(); c++) {
-        for (r=0; r<image.height(); r++) {
-            pix = QPoint(c, r);
-            
-            if (final_fore.contains(pix)) {
-                displayImage.setPixel(pix, qRgb(255, 255, 255));
-            }
-            else {
-                displayImage.setPixel(pix, qRgb(0, 0, 0));
-            }
+    int i;
+    for (i=0; i<final_fore.size(); i++) {
+        pix = QPoint(final_fore[i].x(), final_fore[i].y());
+        if (final_fore.contains(pix)) {
+            displayImage.setPixel(pix, qRgb(255, 255, 255));
         }
     }
 

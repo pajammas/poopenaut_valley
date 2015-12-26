@@ -8,19 +8,17 @@
 
 using namespace Eigen;
 
-#define BETA_VALUE 400.0
+#define BETA_VALUE 0.005
 
 /* Issues (in approximate order of importance):
  *
- * Segmentation usually doesnt work. Getting weird periodic artifacts instead.
- * Input image appears to have no (or very little) effect on the output.
- * Could this just be a beta-tuning problem?
+ * Output image sometimes takes a LOOONG time to appear.
+ * Likely because segment()'s output is a massive QVector.
+ *
+ * Beta slider, reset button!
  *
  * Slow as fuck. Computing the cholesky solver takes 30 times more time than anything else.
  * Which Cholesky to use? Base, LLT, or LDLT?
- *
- * Output image sometimes takes a LOOONG time to appear.
- * Likely because segment()'s output is a massive QVector.
  *
  * Doesn't seem mathy to process the rescaled version of image
  *
