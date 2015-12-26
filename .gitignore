@@ -1,0 +1,7 @@
+# Untracked Files:
+
+# Eigen library should be installed already
+Eigen
+
+# Don't commit project (.pro) files
+*.pro*

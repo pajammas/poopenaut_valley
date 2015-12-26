@@ -29,7 +29,7 @@ using namespace Eigen;
  * Cancelling file select window prints errors
  * Drawing out of bounds does too
  *
- * Take Eigen out of the git repo
+ * Nicer Eigenpath finding?
  */
 
 // For testing:
