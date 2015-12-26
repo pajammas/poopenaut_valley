@@ -18,6 +18,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     public:
+        // Optional argument makes this serve as a default constructor.
         explicit MainWindow(QWidget *parent = 0);
         ~MainWindow();
 
@@ -34,7 +35,8 @@ class MainWindow : public QMainWindow
 
     private:
         Ui::MainWindow *ui;
-        QImage image, displayImage;
+        QImage image;
+        QImage displayImage;
 
 };
 

@@ -8,16 +8,16 @@
 
 using namespace Eigen;
 
-#define BETA_VALUE 0.005
+const float BETA_VALUE = 0.005;
 
 /* Issues (in approximate order of importance):
  *
  * Output image sometimes takes a LOOONG time to appear.
  * Likely because segment()'s output is a massive QVector.
+ Should we clear the colors from the output image? Use tabs?
  *
  * Beta slider, reset button!
  *
- * Slow as fuck. Computing the cholesky solver takes 30 times more time than anything else.
  * Which Cholesky to use? Base, LLT, or LDLT?
  *
  * Doesn't seem mathy to process the rescaled version of image
@@ -32,22 +32,27 @@ using namespace Eigen;
  * Nicer Eigenpath finding?
  */
 
+
 // For testing:
  #include <time.h>
 
 
-Segmenter::Segmenter(QImage *imageIn) {
-    image = *imageIn;
-    h = image.height();
-    w = image.width();
+Segmenter::Segmenter(const QImage *imageIn) {
+    image = imageIn;
+    h = image->height();
+    w = image->width();
     beta = BETA_VALUE;
     setSigma();
-    //cout << negBetaSigma;
 }
 
 Segmenter::Segmenter() {
-    std::cout << "WARNING: Segmenter should be given an image upon construction." << std::endl
-         << "The object created with this call will not work." << std::endl;
+    std::cout << "WARNING: Segmenter should be passed an image parameter." << std::endl
+              << "The object created with this call will not work." << std::endl;
+    image = NULL;
+    w = 0;
+    h = 0;  
+    beta = BETA_VALUE;
+    negBetaSigma = 0;    
 }
 
 Segmenter::~Segmenter() { }
@@ -72,20 +77,20 @@ void Segmenter::setSigma() {
         for (r=0; r<h; r++) {
 
             // Get the pixel color and its neighbors' coordinates
-            pix = image.pixel(c,r);
+            pix = image->pixel(c,r);
             neighs = neighbors(c, r);
 
             // For each neighbor:
             for (n=0; n<neighs.size(); n++) {
                 // Get the neighbor's color
-                neigh = image.pixel( neighs[n] );
+                neigh = image->pixel( neighs[n] );
                 
                 // If the norm is greater, set it as the new max.
                 sigma = max(sigma, norm(pix, neigh));
             }
         }
     }
-    */
+    
 
     // If sigma == 0, the image is all the same color.
     // The weight values don't matter as long as they're all equal.
@@ -93,12 +98,13 @@ void Segmenter::setSigma() {
         negBetaSigma = 0;
     // Plus, we never divide by zero.
     else
+    */
         negBetaSigma = (-1 * beta) / sigma;
 }
 
 // This function returns the vector of points in the foreground.
 // All other points lie in the background.
-QVector<QPoint> Segmenter::segment(QVector<QPoint> *fore, QVector<QPoint> *back) {
+QVector<QPoint> Segmenter::segment(const QVector<QPoint> *fore, const QVector<QPoint> *back) {
 
     clock_t t = clock();
     std::cout << "Starting...\n";
@@ -179,13 +185,13 @@ SparseMatrix<double> Segmenter::getLMatrix() {
         for (r=0; r<h; r++) {
 
             // Get the pixel color and its neighbors' coordinates
-            pix = image.pixel(c,r);
+            pix = image->pixel(c,r);
             neighs = neighbors(c, r);
 
             // For each neighbor:
             for (n=0; n<neighs.size(); n++) {
                 // Get the neighbor's color
-                neigh = image.pixel(neighs[n]);
+                neigh = image->pixel(neighs[n]);
                 this_weight = weight(pix, neigh);
 
                 // This part is an element of the W matrix. Negate it.
@@ -204,7 +210,7 @@ SparseMatrix<double> Segmenter::getLMatrix() {
 
 // I is a diagonal matrix which has 1's only for the pixels
 // which are members of the foreground or the background.
-SparseMatrix<double> Segmenter::getIMatrix(QVector<QPoint> *fore, QVector<QPoint> *back) {
+SparseMatrix<double> Segmenter::getIMatrix(const QVector<QPoint> *fore, const QVector<QPoint> *back) {
 
     SparseMatrix<double> I(h*w, h*w);
     // There will be at most 1 entry per column (it's diagonal)
@@ -230,7 +236,7 @@ SparseMatrix<double> Segmenter::getIMatrix(QVector<QPoint> *fore, QVector<QPoint
 // We could get this at the same time as I, for elegancy/speed.
 // B tells which seed set, if any, each pixel is part of.
 // The choice of 1.0, -1.0 as labels is arbitrary.
-VectorXd Segmenter::getBVector(QVector<QPoint> *fore, QVector<QPoint> *back) {
+VectorXd Segmenter::getBVector(const QVector<QPoint> *fore, const QVector<QPoint> *back) {
     VectorXd B(h*w);
 
     int i, r, c;

@@ -11,14 +11,14 @@
 
 
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget *parent) :    
     QMainWindow(parent),
     ui(new Ui::MainWindow)
-{
-    ui->setupUi(this);
-    ui->widget->setCurrentSeed(1);
-    image = QImage();
-}
+    {
+        ui->setupUi(this);
+        image = QImage();
+        displayImage = QImage();
+    }
 
 MainWindow::~MainWindow()
 {
@@ -42,10 +42,10 @@ void MainWindow::on_selectImageButton_clicked()
                                 tr("Image Files (*.png *.jpg *.jpeg *.bmp)"));
 
     image.load(fileName);
-    // Make a resized copy, don't resize the image itself.
+    // Make a resized copy, don't resize the image itself?
     image = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
     displayImage = image.copy();
-    ui->widget->setImage(displayImage);
+    ui->widget->setImage(&displayImage);
 }
 
 void MainWindow::on_fgRadioButton_clicked()
@@ -80,5 +80,5 @@ void MainWindow::on_segmentButton_clicked()
         }
     }
 
-    ui->widget->setImage(displayImage);
+    ui->widget->setImage(&displayImage);
 }

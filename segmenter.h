@@ -11,23 +11,23 @@ using namespace Eigen;
 class Segmenter 
 {
     public:
-        Segmenter(QImage *);
+        Segmenter(const QImage *);
         Segmenter();
         ~Segmenter();
-        QVector<QPoint> segment(QVector<QPoint> *, QVector<QPoint> *);
+        QVector<QPoint> segment(const QVector<QPoint> *, const QVector<QPoint> *);
 
     private:
-        QImage image;
+        const QImage *image;
         // I'm lazy and don't want to call image.height()
         int h, w;
-        // And it's faster just to compute negBetaSigma once.
+        // Save -1 * beta / sigma, as beta is never used alone.
         double beta, negBetaSigma;
 
         // Top-level helper functions
         void setSigma();
         SparseMatrix<double> getLMatrix();
-        SparseMatrix<double> getIMatrix(QVector<QPoint> *, QVector<QPoint> *);
-        VectorXd getBVector(QVector<QPoint> *, QVector<QPoint> *);
+        SparseMatrix<double> getIMatrix(const QVector<QPoint> *, const QVector<QPoint> *);
+        VectorXd getBVector(const QVector<QPoint> *, const QVector<QPoint> *);
         
         // Basic helper functions.
         QVector<QPoint> neighbors(int, int);

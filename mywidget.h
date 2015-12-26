@@ -11,24 +11,26 @@ class mywidget : public QWidget
 {
     Q_OBJECT
 
-    private:
-        QImage image;
-        QRgb currentSeedColor;
-        QVector<QPoint> foregroundList;
-        QVector<QPoint> backgroundList;
-        bool inBounds(int, int);
-        void paintEvent(QPaintEvent *);
-        void mouseMoveEvent(QMouseEvent *);
-
     public:
+        // Optional argument makes this serve as a default constructor.
         explicit mywidget(QWidget *parent = 0);
-        void setImage(QImage &);
+        // Image cannot be const, because we want to draw on it.
+        void setImage(QImage *);
 
         // Integer representing the region. 1 for FG, 0 for BG
         void setCurrentSeed(int);
         
         QVector<QPoint> getBackground();
         QVector<QPoint> getForeground();
+
+    private:
+        QImage *image;
+        QRgb currentSeedColor;
+        QVector<QPoint> foregroundList;
+        QVector<QPoint> backgroundList;
+        bool inBounds(int, int);
+        void paintEvent(QPaintEvent *);
+        void mouseMoveEvent(QMouseEvent *);
 };
 
 #endif // MYWIDGET_H
