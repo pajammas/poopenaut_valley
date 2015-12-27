@@ -99,10 +99,7 @@ QVector<QPoint> mywidget::getForeground()
 }
 
 void mywidget::reset() {
-    image->fill(qRgba(0,0,0,0));
     update();
-    image = NULL;
-    setCurrentSeed(1);
     foregroundList = QVector<QPoint>();
     backgroundList = QVector<QPoint>();
 }

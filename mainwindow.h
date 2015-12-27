@@ -29,11 +29,13 @@ class MainWindow : public QMainWindow
 
         void on_segmentButton_clicked();
 
+        void on_betaSlider_sliderMoved(int);
         void on_fgRadioButton_clicked();
         void on_bgRadioButton_clicked();
 
 
-    private:
+
+private:
         Ui::MainWindow *ui;
         QImage image;
         QImage displayImage;

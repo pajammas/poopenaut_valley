@@ -14,12 +14,12 @@ class Segmenter
         Segmenter(const QImage *);
         Segmenter();
         ~Segmenter();
-        QVector<QPoint> segment(const QVector<QPoint> *, const QVector<QPoint> *);
+        QVector<QPoint> segment(float, const QVector<QPoint> *, const QVector<QPoint> *);
 
     private:
         const QImage *image;
         int h, w;
-        double beta, negBetaSigma;
+        float negBetaSigma;
 
         // Top-level helper functions
         void setSigma();

@@ -10,9 +10,6 @@
 #include <QFileDialog>
 
 
-// for testing
- #include <time.h>
-
 
 MainWindow::MainWindow(QWidget *parent) :    
     QMainWindow(parent),
@@ -30,13 +27,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_resetButton_clicked()
 {
-    // Set the images back to NULL
-    image = QImage();
-    displayImage = QImage();
+    displayImage = image.copy();
     // Tell the display widget to reset as well
     ui->widget->reset();
-    // Default setting is foreground
-    ui->fgRadioButton->setChecked(1);
 }
 
 
@@ -77,12 +70,10 @@ void MainWindow::on_segmentButton_clicked()
     fore = ui->widget->getForeground();
     back = ui->widget->getBackground();
     
-    // This is where the magic happens
-    QVector<QPoint> final_fore = Segmenter(&image).segment(&fore, &back);
+    float beta = 0.001 * exp(0.0921034*ui->betaSlider->value());
 
-    clock_t t = clock();
-    std::cout << "Starting...\n";
-    std::cout << "Time elapsed, in seconds: " << ((float)(clock()-t))/CLOCKS_PER_SEC << std::endl;
+    // This is where the magic happens
+    QVector<QPoint> final_fore = Segmenter(&image).segment(beta, &fore, &back);
 
     QPoint pix;
     int i;
@@ -91,9 +82,15 @@ void MainWindow::on_segmentButton_clicked()
         pix = QPoint(final_fore[i].x(), final_fore[i].y());
         displayImage.setPixel(pix, qRgb(255, 255, 255));
     }
-    std::cout << "Displaying image.\n";
-    std::cout << "Time elapsed, in seconds: " << ((float)(clock()-t))/CLOCKS_PER_SEC << std::endl;
 
 
     ui->widget->setImage(&displayImage);
+}
+
+void MainWindow::on_betaSlider_sliderMoved(int position)
+{
+    // Scales 0 to 0.001 and 100 to ~10 
+    float beta = 0.001 * exp(0.0921034*position);
+    // Update the label so the user knows what value they've chosen.
+    ui->betaLabel->setText(QString("Beta a(Log Scale): "+QString::number(beta)));
 }

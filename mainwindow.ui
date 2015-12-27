@@ -72,6 +72,23 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="betaLabel">
+        <property name="text">
+         <string>Beta (Log Scale): 0.001</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="betaSlider">
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QPushButton" name="selectImageButton">
@@ -81,16 +98,16 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="resetButton">
+         <widget class="QPushButton" name="segmentButton">
           <property name="text">
-           <string>Reset</string>
+           <string>Segment</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="segmentButton">
+         <widget class="QPushButton" name="resetButton">
           <property name="text">
-           <string>Segment</string>
+           <string>Reset</string>
           </property>
          </widget>
         </item>

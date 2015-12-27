@@ -8,8 +8,6 @@
 
 using namespace Eigen;
 
-static const float BETA_VALUE = 0.005;
-
 /* Issues (in approximate order of importance):
  *
  * Guillome's github issues
@@ -34,8 +32,7 @@ Segmenter::Segmenter(const QImage *imageIn) {
     image = imageIn;
     h = image->height();
     w = image->width();
-    beta = BETA_VALUE;
-    setSigma();
+    negBetaSigma = 0;
 }
 
 Segmenter::Segmenter() {
@@ -43,24 +40,20 @@ Segmenter::Segmenter() {
               << "The object created with this call will not work." << std::endl;
     image = NULL;
     w = 0;
-    h = 0;  
-    beta = BETA_VALUE;
-    negBetaSigma = 0;    
+    h = 0;
+    negBetaSigma = 0;
 }
 
 Segmenter::~Segmenter() { }
 
-// This function will find sigma and set negBetaSigma for later use.
-void Segmenter::setSigma() {
-    // Sigma is the maximum norm of the image.
-    // According to the paper, 0.1 is a good value for most images.
-    double sigma = 0.1;
-    negBetaSigma = (-1 * beta) / sigma;
-}
-
 // This function returns the vector of points in the foreground.
 // All other points lie in the background.
-QVector<QPoint> Segmenter::segment(const QVector<QPoint> *fore, const QVector<QPoint> *back) {
+QVector<QPoint> Segmenter::segment(float beta, const QVector<QPoint> *fore, const QVector<QPoint> *back) {
+
+    // We'll use this constant because weight calculations use -beta/sigma, 
+    // and the paper recommends a sigma of 0.1
+    negBetaSigma = (-1 * beta) / 0.1;
+
 
     clock_t t = clock();
     std::cout << "Starting...\n";
@@ -93,8 +86,6 @@ QVector<QPoint> Segmenter::segment(const QVector<QPoint> *fore, const QVector<QP
         std::cout << "Error: couldn't solve AX=B." << std::endl;
         return QVector<QPoint>();
     }
-    std::cout << "Ax = b solved.\n";
-    std::cout << "Time elapsed, in seconds: " << ((float)(clock()-t))/CLOCKS_PER_SEC << std::endl;
 
 
     QVector<QPoint> final_fore;
