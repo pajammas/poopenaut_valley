@@ -9,19 +9,22 @@
 using namespace Eigen;
 
 /* Issues (in approximate order of importance):
- *
- * Guillome's github issues
- * 
- * Nicer Eigenpath finding?
- * 
- * It would be nice to display the original image with seeds alongside the results.
- * Should we clear the colors from the output image? Use tabs?
- *
- * Beta slider
- *
- * Don't process rescaled image
- * However, leave it for now to speed up testing
- */
+
+Guillome:
+CMake, Gtest
+Module folders?
+
+Add Readme
+
+Multiple segments
+
+It would be nice to display the original image with seeds alongside the results.
+Should we clear the colors from the output image? Use tabs?
+
+Don't process rescaled image
+However, leave it for now to speed up testing
+
+*/
 
 
 // For testing:
