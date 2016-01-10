@@ -61,6 +61,7 @@ void MainWindow::on_bgRadioButton_clicked()
 
 void MainWindow::on_segmentButton_clicked()
 {
+    this->setCursor(Qt::WaitCursor);
     if (image.isNull()) {
         cout << "No image selected." << endl;
         return;
@@ -76,7 +77,7 @@ void MainWindow::on_segmentButton_clicked()
     QVector<QPoint> final_fore = Segmenter(&image).segment(beta, &fore, &back);
 
     // Reload the image to clear all the drawing from it
-    displayImage = image.copy()
+    displayImage = image.copy();
 
     QPoint pix;
     int i;
@@ -88,6 +89,7 @@ void MainWindow::on_segmentButton_clicked()
 
 
     ui->widget->setImage(&displayImage);
+    this->setCursor(Qt::ArrowCursor);
 }
 
 void MainWindow::on_betaSlider_sliderMoved(int position)

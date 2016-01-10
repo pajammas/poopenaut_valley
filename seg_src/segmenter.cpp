@@ -197,7 +197,7 @@ VectorXd Segmenter::getBVector(const QVector<QPoint> *fore, const QVector<QPoint
 
 QVector<QPoint> Segmenter::neighbors(int x, int y) {
     QVector<QPoint> n;
-
+/*
     int i, j;
     for (i=-1; i<2; i++) {
         for (j=-1; j<2; j++) {
@@ -205,14 +205,14 @@ QVector<QPoint> Segmenter::neighbors(int x, int y) {
             if (!(i==0 && j==0) && inBounds(x+i, y+j)) 
                 n += QPoint(x+i, y+j);
         }
-    }
-/*
+    } */
+
     // Add all neighbor pixels which are in bounds
     if (inBounds(x, y+1))  n += QPoint(x, y+1);
     if (inBounds(x, y-1))  n += QPoint(x, y-1);
     if (inBounds(x+1, y))  n += QPoint(x+1, y);
     if (inBounds(x-1, y))  n += QPoint(x-1, y);
-    */
+    
 
     return n;
 }
