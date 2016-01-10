@@ -10,53 +10,28 @@
 #include <QFileDialog>
 
 
-QPalette seedPalettes[NUM_SEEDS] = {QPalette(Qt::red),
-                                    QPalette(Qt::green),
-                                    QPalette(Qt::blue),
-                                    QPalette(Qt::cyan),
-                                    QPalette(Qt::magenta),
-                                    QPalette(Qt::yellow)};
-
 
 MainWindow::MainWindow(QWidget *parent) :    
     QMainWindow(parent),
     ui(new Ui::MainWindow)
     {
         ui->setupUi(this);
-
         image = QImage();
         displayImage = QImage();
-        
-        mapper = new QSignalMapper();
-        makeSeedButtons();
     }
 
 MainWindow::~MainWindow()
 {
-    for(int i=0; i<NUM_SEEDS; i++)
-    {
-        delete seedButtons[i];
-    }
-    delete mapper;
     delete ui;
 }
 
-void MainWindow::makeSeedButtons() {   
-    for(int i=0; i<NUM_SEEDS; i++)
-    {
-        seedButtons[i] = new QRadioButton(QString("Seed %1").arg(i+1));
-        // Color the button
-        seedButtons[i]->setPalette(seedPalettes[i]);
-
-        // Map this button to its index
-        mapper->connect(seedButtons[i], SIGNAL(clicked()), SLOT(map()));
-        mapper->setMapping(seedButtons[i], i);
-        
-        ui->seedLayout->addWidget(seedButtons[i]);
-    }
-    // Connect the mapped index to the setSeed(int) function.
-    ui->tabWidget->controlsTab->connect(mapper, SIGNAL(mapped(int)), SLOT(setCurrentSeed(int)));
+void MainWindow::on_resetButton_clicked()
+{
+    displayImage = image.copy();
+    // Tell the display widget to reset as well
+    ui->widget->reset();
 }
+
 
 void MainWindow::on_selectImageButton_clicked()
 {
@@ -72,6 +47,16 @@ void MainWindow::on_selectImageButton_clicked()
     image = image.scaled(ui->widget->width(),ui->widget->height(),Qt::KeepAspectRatio);
     displayImage = image.copy();
     ui->widget->setImage(&displayImage);
+}
+
+void MainWindow::on_fgRadioButton_clicked()
+{
+    ui->widget->setCurrentSeed(1);
+}
+
+void MainWindow::on_bgRadioButton_clicked()
+{
+    ui->widget->setCurrentSeed(0);
 }
 
 void MainWindow::on_segmentButton_clicked()
@@ -102,18 +87,10 @@ void MainWindow::on_segmentButton_clicked()
     ui->widget->setImage(&displayImage);
 }
 
-void MainWindow::on_resetButton_clicked()
+void MainWindow::on_betaSlider_sliderMoved(int position)
 {
-    displayImage = image.copy();
-    // Tell the display widget to reset as well
-    ui->widget->reset();
-}
-
-
-void MainWindow::on_betaSlider_valueChanged(int value)
-{
-    // Scales (0, 100) to (0.001, 10)
-    float beta = 0.001 * exp(0.0921034*value);
+    // Scales 0 to 0.001 and 100 to ~10 
+    float beta = 0.001 * exp(0.0921034*position);
     // Update the label so the user knows what value they've chosen.
-    ui->betaLabel->setText(QString("Beta (Log Scale): "+QString::number(beta)));
+    ui->betaLabel->setText(QString("Beta a(Log Scale): "+QString::number(beta)));
 }

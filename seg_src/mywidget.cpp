@@ -47,7 +47,6 @@ bool mywidget::inBounds(int x, int y)
 
 void mywidget::setCurrentSeed(int color)
 {
-    cout << color <<endl;
     if (color == 1) currentSeedColor = FG_COLOR;
     else            currentSeedColor = BG_COLOR;
 }

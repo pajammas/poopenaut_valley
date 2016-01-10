@@ -17,14 +17,11 @@ class mywidget : public QWidget
         // Image cannot be const, because we want to draw on it.
         void setImage(QImage *);
 
+        // Integer representing the region. 1 for FG, 0 for BG
+        void setCurrentSeed(int);
         QVector<QPoint> getBackground();
         QVector<QPoint> getForeground();
         void reset();
-
-    public slots:
-        // Integer representing the region. 1 for FG, 0 for BG
-        void setCurrentSeed(int);
-        
 
     private:
         QImage *image;

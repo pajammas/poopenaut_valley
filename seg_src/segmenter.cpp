@@ -18,8 +18,6 @@ Add Readme
 
 Multiple segments
 
-8-Neighbors!!
-
 It would be nice to display the original image with seeds alongside the results.
 Should we clear the colors from the output image? Use tabs?
 
@@ -38,11 +36,6 @@ Segmenter::Segmenter(const QImage *imageIn) {
     h = image->height();
     w = image->width();
     negBetaSigma = 0;
-    // Calculate L using the input image
-    L_squared = getLMatrix();
-    // Square it and store it.
-    L_squared = (L_squared*L_squared);
-    L_squared.makeCompressed();
 }
 
 Segmenter::Segmenter() {
@@ -52,7 +45,6 @@ Segmenter::Segmenter() {
     w = 0;
     h = 0;
     negBetaSigma = 0;
-    L_squared = SparseMatrix<double>();
 }
 
 Segmenter::~Segmenter() { }
@@ -69,11 +61,13 @@ QVector<QPoint> Segmenter::segment(float beta, const QVector<QPoint> *fore, cons
     clock_t t = clock();
     std::cout << "Starting...\n";
 
+    // Never store more than one matrix.
+    SparseMatrix<double> A = getLMatrix();
     // A = I + L^2
-    SparseMatrix<double> A = getIMatrix(fore, back) + L_squared;
+    A = getIMatrix(fore, back) + A*A;
+    A.makeCompressed();
     std::cout << "A computed.\n";
     std::cout << "Time elapsed, in seconds: " << ((float)(clock()-t))/CLOCKS_PER_SEC << std::endl;
-    std::cout << "Estimated time remaining: " << 210.0*((float)(clock()-t))/CLOCKS_PER_SEC << std::endl;
 
     VectorXd B = getBVector(fore, back);
 

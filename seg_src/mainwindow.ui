@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1047</width>
-    <height>711</height>
+    <width>770</width>
+    <height>512</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -25,12 +25,22 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QTabWidget" name="tabWidget">
-      <widget class="mywidget" name="controlsTab" native="true">
-       <attribute name="title">
-        <string>Controls</string>
-       </attribute>
-      </widget>
+     <widget class="mywidget" name="widget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="mouseTracking">
+       <bool>true</bool>
+      </property>
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
      </widget>
     </item>
     <item>
@@ -39,7 +49,27 @@
        <number>6</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="seedLayout"/>
+       <widget class="QRadioButton" name="fgRadioButton">
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>Foreground</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="bgRadioButton">
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>Background</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QLabel" name="betaLabel">

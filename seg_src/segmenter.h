@@ -8,7 +8,6 @@
 using namespace Eigen;
 
 
-
 class Segmenter 
 {
     public:
@@ -21,13 +20,14 @@ class Segmenter
         const QImage *image;
         int h, w;
         float negBetaSigma;
-        SparseMatrix<double> L_squared;
 
+        // Top-level helper functions
         void setSigma();
         SparseMatrix<double> getLMatrix();
         SparseMatrix<double> getIMatrix(const QVector<QPoint> *, const QVector<QPoint> *);
         VectorXd getBVector(const QVector<QPoint> *, const QVector<QPoint> *);
         
+        // Basic helper functions.
         QVector<QPoint> neighbors(int, int);
         bool inBounds(int, int);
         double weight(QColor, QColor);

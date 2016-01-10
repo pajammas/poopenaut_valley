@@ -3,5 +3,4 @@ include_directories(${PROJECT_BINARY_DIR})
 
 add_subdirectory(seg_src)
 
-add_subdirectory(apps)
 add_subdirectory(tests)
