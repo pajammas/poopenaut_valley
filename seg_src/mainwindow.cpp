@@ -75,6 +75,9 @@ void MainWindow::on_segmentButton_clicked()
     // This is where the magic happens
     QVector<QPoint> final_fore = Segmenter(&image).segment(beta, &fore, &back);
 
+    // Reload the image to clear all the drawing from it
+    displayImage = image.copy()
+
     QPoint pix;
     int i;
     // Note: Avoid if statements in this loop! Huge slowdown.

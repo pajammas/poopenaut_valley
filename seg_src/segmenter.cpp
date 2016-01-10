@@ -10,16 +10,11 @@ using namespace Eigen;
 
 /* Issues (in approximate order of importance):
 
-Guillome:
-CMake, Gtest
-Module folders?
+8 - neighbors!!!
 
 Add Readme
 
-Multiple segments
-
 It would be nice to display the original image with seeds alongside the results.
-Should we clear the colors from the output image? Use tabs?
 
 Don't process rescaled image
 However, leave it for now to speed up testing
@@ -202,11 +197,23 @@ VectorXd Segmenter::getBVector(const QVector<QPoint> *fore, const QVector<QPoint
 
 QVector<QPoint> Segmenter::neighbors(int x, int y) {
     QVector<QPoint> n;
+
+    int i, j;
+    for (i=-1; i<2; i++) {
+        for (j=-1; j<2; j++) {
+            // Don't add yourself or out of bounds neighbors
+            if (!(i==0 && j==0) && inBounds(x+i, y+j)) 
+                n += QPoint(x+i, y+j);
+        }
+    }
+/*
     // Add all neighbor pixels which are in bounds
     if (inBounds(x, y+1))  n += QPoint(x, y+1);
     if (inBounds(x, y-1))  n += QPoint(x, y-1);
     if (inBounds(x+1, y))  n += QPoint(x+1, y);
     if (inBounds(x-1, y))  n += QPoint(x-1, y);
+    */
+
     return n;
 }
 
