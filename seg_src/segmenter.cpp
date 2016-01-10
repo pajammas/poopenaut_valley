@@ -95,7 +95,7 @@ QVector<QPoint> Segmenter::segment(float beta, const QVector<QPoint> *fore, cons
         pix = QPoint(i%w, i/w);
         //cout << pix.x() << ' ' << pix.y() << ' ' << X[i] << endl;
 
-        if (X[i] > 0)
+        if (X[i] < 0)
             final_fore += pix;
         // else final_back +=pix
     }
