@@ -1,31 +1,30 @@
-#define FG_COLOR qRgb(12, 175, 243)
-#define BG_COLOR qRgb(236, 0, 16)
-
 #include "mywidget.h"
 #include <QList>
 
-// Take this out when done debugging
-using namespace std;
-#include <iostream>
 
-
+// Constructor and default constructor
 mywidget::mywidget(QWidget *parent) :
     QWidget(parent)
     {
         image = NULL;
         // Foreground seed is selected on startup
+        FG_COLOR = qRgb(12, 175, 243);
+        BG_COLOR = qRgb(236, 0, 16);
         setCurrentSeed(1);
+
+        // initialize as empty lists
         foregroundList = QVector<QPoint>();
         backgroundList = QVector<QPoint>();
     }
     
-// Image cannot be const, because we want to draw on it.
+// Image reference cannot be const, because we want to draw on it.
 void mywidget::setImage(QImage *imageIn)
 {
     image = imageIn;
     update();
 }
 
+// When the image is drawn upon, update it to show changes
 void mywidget::paintEvent(QPaintEvent *e)
 {
     if (image != NULL)
@@ -37,6 +36,7 @@ void mywidget::paintEvent(QPaintEvent *e)
     QWidget::paintEvent(e);
 }
 
+// Helper function to make sure everything is in bounds
 bool mywidget::inBounds(int x, int y)
 {
     return((x >= 0) &&
@@ -45,26 +45,30 @@ bool mywidget::inBounds(int x, int y)
            (y < (image->height())) );
 }
 
+
+// Simple setter function
 void mywidget::setCurrentSeed(int color)
 {
     if (color == 1) currentSeedColor = FG_COLOR;
     else            currentSeedColor = BG_COLOR;
 }
 
-
+// If the user draws on the picture, add the pixel to a list
 void mywidget::mouseMoveEvent(QMouseEvent *e)
 {
     int x = e->x();
     int y = e->y();
     QPoint p = QPoint(x, y);
 
+    // If there's an image, this pixel is inbounds,
+    // and not already in a list, add it to a list
     if (image != NULL &&
         inBounds(x, y) &&
         !foregroundList.contains(p) &&
         !backgroundList.contains(p) &&
         e->buttons() == Qt::LeftButton )
     {
-            // Set this pixel as the seed color
+            // Set this pixel to be the seed color
             image->setPixel(p, currentSeedColor);
             
             // Set 4-neighbor pixels as well for visibility
@@ -77,6 +81,7 @@ void mywidget::mouseMoveEvent(QMouseEvent *e)
             }
             update();
 
+            // Add to FG or BG list
             if (currentSeedColor == FG_COLOR)
             {
                 foregroundList.append(p);
@@ -88,6 +93,7 @@ void mywidget::mouseMoveEvent(QMouseEvent *e)
     }
 }
 
+// Simple getter functions
 QVector<QPoint> mywidget::getBackground()
 {
     return backgroundList;
@@ -98,6 +104,7 @@ QVector<QPoint> mywidget::getForeground()
     return foregroundList;
 }
 
+// Clear previous drawing from the image and empty the lists
 void mywidget::reset() {
     update();
     foregroundList = QVector<QPoint>();

@@ -8,24 +8,11 @@
 
 using namespace Eigen;
 
-/* Issues (in approximate order of importance):
-
-8 - neighbors!!!
-
-Add Readme
-
-It would be nice to display the original image with seeds alongside the results.
-
-Don't process rescaled image
-However, leave it for now to speed up testing
-
-*/
-
-
 // For testing:
  #include <time.h>
 
 
+// Standard constructor
 Segmenter::Segmenter(const QImage *imageIn) {
     image = imageIn;
     h = image->height();
@@ -33,6 +20,7 @@ Segmenter::Segmenter(const QImage *imageIn) {
     negBetaSigma = 0;
 }
 
+// Default constructor should not be used
 Segmenter::Segmenter() {
     std::cout << "WARNING: Segmenter should be passed an image parameter." << std::endl
               << "The object created with this call will not work." << std::endl;
@@ -52,7 +40,7 @@ QVector<QPoint> Segmenter::segment(float beta, const QVector<QPoint> *fore, cons
     // and the paper recommends a sigma of 0.1
     negBetaSigma = (-1 * beta) / 0.1;
 
-
+    // Time profiling
     clock_t t = clock();
     std::cout << "Starting...\n";
 
@@ -100,6 +88,7 @@ QVector<QPoint> Segmenter::segment(float beta, const QVector<QPoint> *fore, cons
         // else final_back +=pix
     }
 
+    // We only need to return one set of pixels
     return final_fore;
 }
 
@@ -156,7 +145,8 @@ SparseMatrix<double> Segmenter::getIMatrix(const QVector<QPoint> *fore, const QV
     I.reserve(VectorXi::Constant(h*w, 1));
 
     int i, r, c;
-          
+
+    // Give all seeds a value of 1; else 0
     for(i=0; i < fore->size(); i++) {
         r = (*fore)[i].y();
         c = (*fore)[i].x();
@@ -180,6 +170,7 @@ VectorXd Segmenter::getBVector(const QVector<QPoint> *fore, const QVector<QPoint
 
     int i, r, c;
 
+    // Set seed pixels to 1 or -1; else 0
     for(i=0; i<fore->size(); i++) {
         r = (*fore)[i].y();
         c = (*fore)[i].x();
@@ -194,10 +185,11 @@ VectorXd Segmenter::getBVector(const QVector<QPoint> *fore, const QVector<QPoint
     return B;
 }
 
-
+// Helper function to get the neighbors of a pixel
 QVector<QPoint> Segmenter::neighbors(int x, int y) {
     QVector<QPoint> n;
-/*
+
+/*  // 8-Neighbors: much slower
     int i, j;
     for (i=-1; i<2; i++) {
         for (j=-1; j<2; j++) {
@@ -213,14 +205,13 @@ QVector<QPoint> Segmenter::neighbors(int x, int y) {
     if (inBounds(x+1, y))  n += QPoint(x+1, y);
     if (inBounds(x-1, y))  n += QPoint(x-1, y);
     
-
     return n;
 }
 
 bool Segmenter::inBounds(int x, int y)
     { return ((x>=0) && (y>=0) && (x<w) && (y<h)); }
 
-// Simple equation from the paper.1li
+// Simple equation from the paper.
 double Segmenter::weight(QColor i, QColor j)
     { return exp(negBetaSigma * norm(i,j)) + 0.000001; }
 
